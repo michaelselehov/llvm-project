@@ -6998,67 +6998,63 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; CHECK-NEXT:    s_andn2_saveexec_b32 s6, s6
 ; CHECK-NEXT:    s_cbranch_execz .LBB6_6
 ; CHECK-NEXT:  ; %bb.4: ; %memmove_bwd_loop.preheader
-; CHECK-NEXT:    v_add_co_u32 v0, vcc_lo, v0, 0x700
-; CHECK-NEXT:    v_add_co_ci_u32_e64 v1, null, 0, v1, vcc_lo
-; CHECK-NEXT:    v_add_co_u32 v2, vcc_lo, v2, 0x700
-; CHECK-NEXT:    v_add_co_ci_u32_e64 v3, null, 0, v3, vcc_lo
 ; CHECK-NEXT:    s_movk_i32 s4, 0xf800
 ; CHECK-NEXT:    s_mov_b32 s5, -1
 ; CHECK-NEXT:  .LBB6_5: ; %memmove_bwd_loop
 ; CHECK-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    s_clause 0xf
-; CHECK-NEXT:    global_load_dwordx4 v[4:7], v[2:3], off offset:224
-; CHECK-NEXT:    global_load_dwordx4 v[8:11], v[2:3], off offset:240
-; CHECK-NEXT:    global_load_dwordx4 v[12:15], v[2:3], off offset:192
-; CHECK-NEXT:    global_load_dwordx4 v[16:19], v[2:3], off offset:208
-; CHECK-NEXT:    global_load_dwordx4 v[20:23], v[2:3], off offset:160
-; CHECK-NEXT:    global_load_dwordx4 v[24:27], v[2:3], off offset:176
-; CHECK-NEXT:    global_load_dwordx4 v[28:31], v[2:3], off offset:128
-; CHECK-NEXT:    global_load_dwordx4 v[32:35], v[2:3], off offset:144
-; CHECK-NEXT:    global_load_dwordx4 v[36:39], v[2:3], off offset:96
-; CHECK-NEXT:    global_load_dwordx4 v[48:51], v[2:3], off offset:112
-; CHECK-NEXT:    global_load_dwordx4 v[52:55], v[2:3], off offset:64
-; CHECK-NEXT:    global_load_dwordx4 v[64:67], v[2:3], off offset:80
-; CHECK-NEXT:    global_load_dwordx4 v[68:71], v[2:3], off offset:32
-; CHECK-NEXT:    global_load_dwordx4 v[80:83], v[2:3], off offset:48
-; CHECK-NEXT:    global_load_dwordx4 v[84:87], v[2:3], off
-; CHECK-NEXT:    global_load_dwordx4 v[96:99], v[2:3], off offset:16
+; CHECK-NEXT:    global_load_dwordx4 v[4:7], v[2:3], off offset:2016
+; CHECK-NEXT:    global_load_dwordx4 v[8:11], v[2:3], off offset:2032
+; CHECK-NEXT:    global_load_dwordx4 v[12:15], v[2:3], off offset:1984
+; CHECK-NEXT:    global_load_dwordx4 v[16:19], v[2:3], off offset:2000
+; CHECK-NEXT:    global_load_dwordx4 v[20:23], v[2:3], off offset:1952
+; CHECK-NEXT:    global_load_dwordx4 v[24:27], v[2:3], off offset:1968
+; CHECK-NEXT:    global_load_dwordx4 v[28:31], v[2:3], off offset:1920
+; CHECK-NEXT:    global_load_dwordx4 v[32:35], v[2:3], off offset:1936
+; CHECK-NEXT:    global_load_dwordx4 v[36:39], v[2:3], off offset:1888
+; CHECK-NEXT:    global_load_dwordx4 v[48:51], v[2:3], off offset:1904
+; CHECK-NEXT:    global_load_dwordx4 v[52:55], v[2:3], off offset:1856
+; CHECK-NEXT:    global_load_dwordx4 v[64:67], v[2:3], off offset:1872
+; CHECK-NEXT:    global_load_dwordx4 v[68:71], v[2:3], off offset:1824
+; CHECK-NEXT:    global_load_dwordx4 v[80:83], v[2:3], off offset:1840
+; CHECK-NEXT:    global_load_dwordx4 v[84:87], v[2:3], off offset:1792
+; CHECK-NEXT:    global_load_dwordx4 v[96:99], v[2:3], off offset:1808
 ; CHECK-NEXT:    v_add_co_u32 v2, vcc_lo, v2, 0xffffff00
 ; CHECK-NEXT:    v_add_co_ci_u32_e64 v3, null, -1, v3, vcc_lo
 ; CHECK-NEXT:    s_add_u32 s4, s4, 0x100
 ; CHECK-NEXT:    s_addc_u32 s5, s5, 0
 ; CHECK-NEXT:    s_waitcnt vmcnt(15)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off offset:224
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off offset:2016
 ; CHECK-NEXT:    s_waitcnt vmcnt(14)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[8:11], off offset:240
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[8:11], off offset:2032
 ; CHECK-NEXT:    s_waitcnt vmcnt(13)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[12:15], off offset:192
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[12:15], off offset:1984
 ; CHECK-NEXT:    s_waitcnt vmcnt(12)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[16:19], off offset:208
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[16:19], off offset:2000
 ; CHECK-NEXT:    s_waitcnt vmcnt(11)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[20:23], off offset:160
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[20:23], off offset:1952
 ; CHECK-NEXT:    s_waitcnt vmcnt(10)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[24:27], off offset:176
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[24:27], off offset:1968
 ; CHECK-NEXT:    s_waitcnt vmcnt(9)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[28:31], off offset:128
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[28:31], off offset:1920
 ; CHECK-NEXT:    s_waitcnt vmcnt(8)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[32:35], off offset:144
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[32:35], off offset:1936
 ; CHECK-NEXT:    s_waitcnt vmcnt(7)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[36:39], off offset:96
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[36:39], off offset:1888
 ; CHECK-NEXT:    s_waitcnt vmcnt(6)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[48:51], off offset:112
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[48:51], off offset:1904
 ; CHECK-NEXT:    s_waitcnt vmcnt(5)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[52:55], off offset:64
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[52:55], off offset:1856
 ; CHECK-NEXT:    s_waitcnt vmcnt(4)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[64:67], off offset:80
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[64:67], off offset:1872
 ; CHECK-NEXT:    s_waitcnt vmcnt(3)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[68:71], off offset:32
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[68:71], off offset:1824
 ; CHECK-NEXT:    s_waitcnt vmcnt(2)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[80:83], off offset:48
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[80:83], off offset:1840
 ; CHECK-NEXT:    s_waitcnt vmcnt(1)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[84:87], off
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[84:87], off offset:1792
 ; CHECK-NEXT:    s_waitcnt vmcnt(0)
-; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[96:99], off offset:16
+; CHECK-NEXT:    global_store_dwordx4 v[0:1], v[96:99], off offset:1808
 ; CHECK-NEXT:    v_add_co_u32 v0, vcc_lo, v0, 0xffffff00
 ; CHECK-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v1, vcc_lo
 ; CHECK-NEXT:    s_cmp_eq_u64 s[4:5], 0
@@ -7710,33 +7706,29 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    s_andn2_saveexec_b32 s6, s6
 ; ALIGNED-NEXT:    s_cbranch_execz .LBB6_6
 ; ALIGNED-NEXT:  ; %bb.4: ; %memmove_bwd_loop.preheader
-; ALIGNED-NEXT:    v_add_co_u32 v12, vcc_lo, v0, 0x700
-; ALIGNED-NEXT:    v_add_co_ci_u32_e64 v13, null, 0, v1, vcc_lo
-; ALIGNED-NEXT:    v_add_co_u32 v14, vcc_lo, v2, 0x700
-; ALIGNED-NEXT:    v_add_co_ci_u32_e64 v15, null, 0, v3, vcc_lo
 ; ALIGNED-NEXT:    s_movk_i32 s4, 0xf800
 ; ALIGNED-NEXT:    s_mov_b32 s5, -1
 ; ALIGNED-NEXT:  .LBB6_5: ; %memmove_bwd_loop
 ; ALIGNED-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; ALIGNED-NEXT:    s_clause 0xf
-; ALIGNED-NEXT:    global_load_dwordx4 v[16:19], v[14:15], off offset:240
-; ALIGNED-NEXT:    global_load_dwordx4 v[20:23], v[14:15], off offset:224
-; ALIGNED-NEXT:    global_load_dwordx4 v[0:3], v[14:15], off
-; ALIGNED-NEXT:    global_load_dwordx4 v[4:7], v[14:15], off offset:16
-; ALIGNED-NEXT:    global_load_dwordx4 v[8:11], v[14:15], off offset:32
-; ALIGNED-NEXT:    global_load_dwordx4 v[100:103], v[14:15], off offset:48
-; ALIGNED-NEXT:    global_load_dwordx4 v[112:115], v[14:15], off offset:64
-; ALIGNED-NEXT:    global_load_dwordx4 v[116:119], v[14:15], off offset:80
-; ALIGNED-NEXT:    global_load_dwordx4 v[40:43], v[14:15], off offset:96
-; ALIGNED-NEXT:    global_load_dwordx4 v[28:31], v[14:15], off offset:112
-; ALIGNED-NEXT:    global_load_dwordx4 v[34:37], v[14:15], off offset:128
-; ALIGNED-NEXT:    global_load_dwordx4 v[44:47], v[14:15], off offset:144
-; ALIGNED-NEXT:    global_load_dwordx4 v[54:57], v[14:15], off offset:160
-; ALIGNED-NEXT:    global_load_dwordx4 v[68:71], v[14:15], off offset:176
-; ALIGNED-NEXT:    global_load_dwordx4 v[82:85], v[14:15], off offset:192
-; ALIGNED-NEXT:    global_load_dwordx4 v[64:67], v[14:15], off offset:208
-; ALIGNED-NEXT:    v_add_co_u32 v14, vcc_lo, v14, 0xffffff00
-; ALIGNED-NEXT:    v_add_co_ci_u32_e64 v15, null, -1, v15, vcc_lo
+; ALIGNED-NEXT:    global_load_dwordx4 v[16:19], v[2:3], off offset:2032
+; ALIGNED-NEXT:    global_load_dwordx4 v[20:23], v[2:3], off offset:2016
+; ALIGNED-NEXT:    global_load_dwordx4 v[4:7], v[2:3], off offset:1792
+; ALIGNED-NEXT:    global_load_dwordx4 v[8:11], v[2:3], off offset:1808
+; ALIGNED-NEXT:    global_load_dwordx4 v[12:15], v[2:3], off offset:1824
+; ALIGNED-NEXT:    global_load_dwordx4 v[100:103], v[2:3], off offset:1840
+; ALIGNED-NEXT:    global_load_dwordx4 v[112:115], v[2:3], off offset:1856
+; ALIGNED-NEXT:    global_load_dwordx4 v[116:119], v[2:3], off offset:1872
+; ALIGNED-NEXT:    global_load_dwordx4 v[40:43], v[2:3], off offset:1888
+; ALIGNED-NEXT:    global_load_dwordx4 v[28:31], v[2:3], off offset:1904
+; ALIGNED-NEXT:    global_load_dwordx4 v[34:37], v[2:3], off offset:1920
+; ALIGNED-NEXT:    global_load_dwordx4 v[44:47], v[2:3], off offset:1936
+; ALIGNED-NEXT:    global_load_dwordx4 v[54:57], v[2:3], off offset:1952
+; ALIGNED-NEXT:    global_load_dwordx4 v[68:71], v[2:3], off offset:1968
+; ALIGNED-NEXT:    global_load_dwordx4 v[82:85], v[2:3], off offset:1984
+; ALIGNED-NEXT:    global_load_dwordx4 v[64:67], v[2:3], off offset:2000
+; ALIGNED-NEXT:    v_add_co_u32 v2, vcc_lo, v2, 0xffffff00
+; ALIGNED-NEXT:    v_add_co_ci_u32_e64 v3, null, -1, v3, vcc_lo
 ; ALIGNED-NEXT:    s_add_u32 s4, s4, 0x100
 ; ALIGNED-NEXT:    s_addc_u32 s5, s5, 0
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(15)
@@ -7751,17 +7743,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:336
 ; ALIGNED-NEXT:    s_cmp_eq_u64 s[4:5], 0
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v33, off offset:254
-; ALIGNED-NEXT:    global_store_byte v[12:13], v33, off offset:252
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v33, off offset:2046
+; ALIGNED-NEXT:    global_store_byte v[0:1], v33, off offset:2044
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v32, off offset:250
-; ALIGNED-NEXT:    global_store_byte v[12:13], v32, off offset:248
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v32, off offset:2042
+; ALIGNED-NEXT:    global_store_byte v[0:1], v32, off offset:2040
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v27, off offset:246
-; ALIGNED-NEXT:    global_store_byte v[12:13], v27, off offset:244
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v27, off offset:2038
+; ALIGNED-NEXT:    global_store_byte v[0:1], v27, off offset:2036
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v26, off offset:242
-; ALIGNED-NEXT:    global_store_byte v[12:13], v26, off offset:240
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v26, off offset:2034
+; ALIGNED-NEXT:    global_store_byte v[0:1], v26, off offset:2032
 ; ALIGNED-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:352
 ; ALIGNED-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:356
 ; ALIGNED-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:360
@@ -7772,17 +7764,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:356
 ; ALIGNED-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:352
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v53, off offset:238
-; ALIGNED-NEXT:    global_store_byte v[12:13], v53, off offset:236
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v53, off offset:2030
+; ALIGNED-NEXT:    global_store_byte v[0:1], v53, off offset:2028
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v52, off offset:234
-; ALIGNED-NEXT:    global_store_byte v[12:13], v52, off offset:232
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v52, off offset:2026
+; ALIGNED-NEXT:    global_store_byte v[0:1], v52, off offset:2024
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v51, off offset:230
-; ALIGNED-NEXT:    global_store_byte v[12:13], v51, off offset:228
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v51, off offset:2022
+; ALIGNED-NEXT:    global_store_byte v[0:1], v51, off offset:2020
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v50, off offset:226
-; ALIGNED-NEXT:    global_store_byte v[12:13], v50, off offset:224
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v50, off offset:2018
+; ALIGNED-NEXT:    global_store_byte v[0:1], v50, off offset:2016
 ; ALIGNED-NEXT:    buffer_store_dword v64, off, s[0:3], s32 offset:304
 ; ALIGNED-NEXT:    buffer_store_dword v65, off, s[0:3], s32 offset:308
 ; ALIGNED-NEXT:    buffer_store_dword v66, off, s[0:3], s32 offset:312
@@ -7793,17 +7785,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v67, off, s[0:3], s32 offset:308
 ; ALIGNED-NEXT:    buffer_load_dword v66, off, s[0:3], s32 offset:304
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v81, off offset:222
-; ALIGNED-NEXT:    global_store_byte v[12:13], v81, off offset:220
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v81, off offset:2014
+; ALIGNED-NEXT:    global_store_byte v[0:1], v81, off offset:2012
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v80, off offset:218
-; ALIGNED-NEXT:    global_store_byte v[12:13], v80, off offset:216
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v80, off offset:2010
+; ALIGNED-NEXT:    global_store_byte v[0:1], v80, off offset:2008
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v67, off offset:214
-; ALIGNED-NEXT:    global_store_byte v[12:13], v67, off offset:212
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v67, off offset:2006
+; ALIGNED-NEXT:    global_store_byte v[0:1], v67, off offset:2004
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v66, off offset:210
-; ALIGNED-NEXT:    global_store_byte v[12:13], v66, off offset:208
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v66, off offset:2002
+; ALIGNED-NEXT:    global_store_byte v[0:1], v66, off offset:2000
 ; ALIGNED-NEXT:    buffer_store_dword v82, off, s[0:3], s32 offset:320
 ; ALIGNED-NEXT:    buffer_store_dword v83, off, s[0:3], s32 offset:324
 ; ALIGNED-NEXT:    buffer_store_dword v84, off, s[0:3], s32 offset:328
@@ -7814,17 +7806,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v86, off, s[0:3], s32 offset:324
 ; ALIGNED-NEXT:    buffer_load_dword v82, off, s[0:3], s32 offset:320
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v98, off offset:206
-; ALIGNED-NEXT:    global_store_byte v[12:13], v98, off offset:204
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v98, off offset:1998
+; ALIGNED-NEXT:    global_store_byte v[0:1], v98, off offset:1996
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v87, off offset:202
-; ALIGNED-NEXT:    global_store_byte v[12:13], v87, off offset:200
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v87, off offset:1994
+; ALIGNED-NEXT:    global_store_byte v[0:1], v87, off offset:1992
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v86, off offset:198
-; ALIGNED-NEXT:    global_store_byte v[12:13], v86, off offset:196
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v86, off offset:1990
+; ALIGNED-NEXT:    global_store_byte v[0:1], v86, off offset:1988
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v82, off offset:194
-; ALIGNED-NEXT:    global_store_byte v[12:13], v82, off offset:192
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v82, off offset:1986
+; ALIGNED-NEXT:    global_store_byte v[0:1], v82, off offset:1984
 ; ALIGNED-NEXT:    buffer_store_dword v68, off, s[0:3], s32 offset:400
 ; ALIGNED-NEXT:    buffer_store_dword v69, off, s[0:3], s32 offset:404
 ; ALIGNED-NEXT:    buffer_store_dword v70, off, s[0:3], s32 offset:408
@@ -7835,17 +7827,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v83, off, s[0:3], s32 offset:404
 ; ALIGNED-NEXT:    buffer_load_dword v68, off, s[0:3], s32 offset:400
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v99, off offset:190
-; ALIGNED-NEXT:    global_store_byte v[12:13], v99, off offset:188
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v99, off offset:1982
+; ALIGNED-NEXT:    global_store_byte v[0:1], v99, off offset:1980
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v96, off offset:186
-; ALIGNED-NEXT:    global_store_byte v[12:13], v96, off offset:184
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v96, off offset:1978
+; ALIGNED-NEXT:    global_store_byte v[0:1], v96, off offset:1976
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v83, off offset:182
-; ALIGNED-NEXT:    global_store_byte v[12:13], v83, off offset:180
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v83, off offset:1974
+; ALIGNED-NEXT:    global_store_byte v[0:1], v83, off offset:1972
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v68, off offset:178
-; ALIGNED-NEXT:    global_store_byte v[12:13], v68, off offset:176
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v68, off offset:1970
+; ALIGNED-NEXT:    global_store_byte v[0:1], v68, off offset:1968
 ; ALIGNED-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:416
 ; ALIGNED-NEXT:    buffer_store_dword v55, off, s[0:3], s32 offset:420
 ; ALIGNED-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:424
@@ -7856,17 +7848,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v69, off, s[0:3], s32 offset:420
 ; ALIGNED-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:416
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v97, off offset:174
-; ALIGNED-NEXT:    global_store_byte v[12:13], v97, off offset:172
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v97, off offset:1966
+; ALIGNED-NEXT:    global_store_byte v[0:1], v97, off offset:1964
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v84, off offset:170
-; ALIGNED-NEXT:    global_store_byte v[12:13], v84, off offset:168
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v84, off offset:1962
+; ALIGNED-NEXT:    global_store_byte v[0:1], v84, off offset:1960
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v69, off offset:166
-; ALIGNED-NEXT:    global_store_byte v[12:13], v69, off offset:164
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v69, off offset:1958
+; ALIGNED-NEXT:    global_store_byte v[0:1], v69, off offset:1956
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v54, off offset:162
-; ALIGNED-NEXT:    global_store_byte v[12:13], v54, off offset:160
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v54, off offset:1954
+; ALIGNED-NEXT:    global_store_byte v[0:1], v54, off offset:1952
 ; ALIGNED-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:368
 ; ALIGNED-NEXT:    buffer_store_dword v45, off, s[0:3], s32 offset:372
 ; ALIGNED-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:376
@@ -7877,17 +7869,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:372
 ; ALIGNED-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:368
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v85, off offset:158
-; ALIGNED-NEXT:    global_store_byte v[12:13], v85, off offset:156
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v85, off offset:1950
+; ALIGNED-NEXT:    global_store_byte v[0:1], v85, off offset:1948
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v70, off offset:154
-; ALIGNED-NEXT:    global_store_byte v[12:13], v70, off offset:152
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v70, off offset:1946
+; ALIGNED-NEXT:    global_store_byte v[0:1], v70, off offset:1944
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v55, off offset:150
-; ALIGNED-NEXT:    global_store_byte v[12:13], v55, off offset:148
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v55, off offset:1942
+; ALIGNED-NEXT:    global_store_byte v[0:1], v55, off offset:1940
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v38, off offset:146
-; ALIGNED-NEXT:    global_store_byte v[12:13], v38, off offset:144
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v38, off offset:1938
+; ALIGNED-NEXT:    global_store_byte v[0:1], v38, off offset:1936
 ; ALIGNED-NEXT:    buffer_store_dword v34, off, s[0:3], s32 offset:384
 ; ALIGNED-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:388
 ; ALIGNED-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:392
@@ -7898,17 +7890,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:388
 ; ALIGNED-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:384
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v71, off offset:142
-; ALIGNED-NEXT:    global_store_byte v[12:13], v71, off offset:140
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v71, off offset:1934
+; ALIGNED-NEXT:    global_store_byte v[0:1], v71, off offset:1932
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v64, off offset:138
-; ALIGNED-NEXT:    global_store_byte v[12:13], v64, off offset:136
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v64, off offset:1930
+; ALIGNED-NEXT:    global_store_byte v[0:1], v64, off offset:1928
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v39, off offset:134
-; ALIGNED-NEXT:    global_store_byte v[12:13], v39, off offset:132
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v39, off offset:1926
+; ALIGNED-NEXT:    global_store_byte v[0:1], v39, off offset:1924
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v34, off offset:130
-; ALIGNED-NEXT:    global_store_byte v[12:13], v34, off offset:128
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v34, off offset:1922
+; ALIGNED-NEXT:    global_store_byte v[0:1], v34, off offset:1920
 ; ALIGNED-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:464
 ; ALIGNED-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:468
 ; ALIGNED-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:472
@@ -7919,17 +7911,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v35, off, s[0:3], s32 offset:468
 ; ALIGNED-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:464
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v65, off offset:126
-; ALIGNED-NEXT:    global_store_byte v[12:13], v65, off offset:124
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v65, off offset:1918
+; ALIGNED-NEXT:    global_store_byte v[0:1], v65, off offset:1916
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v48, off offset:122
-; ALIGNED-NEXT:    global_store_byte v[12:13], v48, off offset:120
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v48, off offset:1914
+; ALIGNED-NEXT:    global_store_byte v[0:1], v48, off offset:1912
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v35, off offset:118
-; ALIGNED-NEXT:    global_store_byte v[12:13], v35, off offset:116
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v35, off offset:1910
+; ALIGNED-NEXT:    global_store_byte v[0:1], v35, off offset:1908
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v28, off offset:114
-; ALIGNED-NEXT:    global_store_byte v[12:13], v28, off offset:112
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v28, off offset:1906
+; ALIGNED-NEXT:    global_store_byte v[0:1], v28, off offset:1904
 ; ALIGNED-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:480
 ; ALIGNED-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:484
 ; ALIGNED-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:488
@@ -7940,17 +7932,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:484
 ; ALIGNED-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:480
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v49, off offset:110
-; ALIGNED-NEXT:    global_store_byte v[12:13], v49, off offset:108
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v49, off offset:1902
+; ALIGNED-NEXT:    global_store_byte v[0:1], v49, off offset:1900
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v36, off offset:106
-; ALIGNED-NEXT:    global_store_byte v[12:13], v36, off offset:104
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v36, off offset:1898
+; ALIGNED-NEXT:    global_store_byte v[0:1], v36, off offset:1896
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v29, off offset:102
-; ALIGNED-NEXT:    global_store_byte v[12:13], v29, off offset:100
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v29, off offset:1894
+; ALIGNED-NEXT:    global_store_byte v[0:1], v29, off offset:1892
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v22, off offset:98
-; ALIGNED-NEXT:    global_store_byte v[12:13], v22, off offset:96
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v22, off offset:1890
+; ALIGNED-NEXT:    global_store_byte v[0:1], v22, off offset:1888
 ; ALIGNED-NEXT:    buffer_store_dword v116, off, s[0:3], s32 offset:432
 ; ALIGNED-NEXT:    buffer_store_dword v117, off, s[0:3], s32 offset:436
 ; ALIGNED-NEXT:    buffer_store_dword v118, off, s[0:3], s32 offset:440
@@ -7961,17 +7953,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:436
 ; ALIGNED-NEXT:    buffer_load_dword v19, off, s[0:3], s32 offset:432
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v37, off offset:94
-; ALIGNED-NEXT:    global_store_byte v[12:13], v37, off offset:92
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v37, off offset:1886
+; ALIGNED-NEXT:    global_store_byte v[0:1], v37, off offset:1884
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v30, off offset:90
-; ALIGNED-NEXT:    global_store_byte v[12:13], v30, off offset:88
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v30, off offset:1882
+; ALIGNED-NEXT:    global_store_byte v[0:1], v30, off offset:1880
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v23, off offset:86
-; ALIGNED-NEXT:    global_store_byte v[12:13], v23, off offset:84
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v23, off offset:1878
+; ALIGNED-NEXT:    global_store_byte v[0:1], v23, off offset:1876
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v19, off offset:82
-; ALIGNED-NEXT:    global_store_byte v[12:13], v19, off offset:80
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v19, off offset:1874
+; ALIGNED-NEXT:    global_store_byte v[0:1], v19, off offset:1872
 ; ALIGNED-NEXT:    buffer_store_dword v112, off, s[0:3], s32 offset:448
 ; ALIGNED-NEXT:    buffer_store_dword v113, off, s[0:3], s32 offset:452
 ; ALIGNED-NEXT:    buffer_store_dword v114, off, s[0:3], s32 offset:456
@@ -7990,17 +7982,17 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v115, 24, v50
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v50, 8, v50
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v31, off offset:78
-; ALIGNED-NEXT:    global_store_byte v[12:13], v31, off offset:76
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v31, off offset:1870
+; ALIGNED-NEXT:    global_store_byte v[0:1], v31, off offset:1868
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v24, off offset:74
-; ALIGNED-NEXT:    global_store_byte v[12:13], v24, off offset:72
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v24, off offset:1866
+; ALIGNED-NEXT:    global_store_byte v[0:1], v24, off offset:1864
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v20, off offset:70
-; ALIGNED-NEXT:    global_store_byte v[12:13], v20, off offset:68
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v20, off offset:1862
+; ALIGNED-NEXT:    global_store_byte v[0:1], v20, off offset:1860
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v17, off offset:66
-; ALIGNED-NEXT:    global_store_byte v[12:13], v17, off offset:64
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v17, off offset:1858
+; ALIGNED-NEXT:    global_store_byte v[0:1], v17, off offset:1856
 ; ALIGNED-NEXT:    buffer_store_dword v100, off, s[0:3], s32 offset:528
 ; ALIGNED-NEXT:    buffer_store_dword v101, off, s[0:3], s32 offset:532
 ; ALIGNED-NEXT:    buffer_store_dword v102, off, s[0:3], s32 offset:536
@@ -8019,322 +8011,322 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v103, 24, v26
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v26, 8, v26
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v25, off offset:62
-; ALIGNED-NEXT:    global_store_byte v[12:13], v25, off offset:60
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v25, off offset:1854
+; ALIGNED-NEXT:    global_store_byte v[0:1], v25, off offset:1852
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v21, off offset:58
-; ALIGNED-NEXT:    global_store_byte v[12:13], v21, off offset:56
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v21, off offset:1850
+; ALIGNED-NEXT:    global_store_byte v[0:1], v21, off offset:1848
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v18, off offset:54
-; ALIGNED-NEXT:    global_store_byte v[12:13], v18, off offset:52
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v18, off offset:1846
+; ALIGNED-NEXT:    global_store_byte v[0:1], v18, off offset:1844
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v16, off offset:50
-; ALIGNED-NEXT:    global_store_byte v[12:13], v16, off offset:48
-; ALIGNED-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:544
-; ALIGNED-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:548
-; ALIGNED-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:552
-; ALIGNED-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:556
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v16, off offset:1842
+; ALIGNED-NEXT:    global_store_byte v[0:1], v16, off offset:1840
+; ALIGNED-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:544
+; ALIGNED-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:548
+; ALIGNED-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:552
+; ALIGNED-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:556
 ; ALIGNED-NEXT:    s_clause 0x3
-; ALIGNED-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:552
-; ALIGNED-NEXT:    buffer_load_dword v10, off, s[0:3], s32 offset:556
-; ALIGNED-NEXT:    buffer_load_dword v9, off, s[0:3], s32 offset:544
-; ALIGNED-NEXT:    buffer_load_dword v8, off, s[0:3], s32 offset:548
+; ALIGNED-NEXT:    buffer_load_dword v15, off, s[0:3], s32 offset:552
+; ALIGNED-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:556
+; ALIGNED-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:544
+; ALIGNED-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:548
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v11, off offset:42
-; ALIGNED-NEXT:    global_store_byte v[12:13], v11, off offset:40
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v15, off offset:1834
+; ALIGNED-NEXT:    global_store_byte v[0:1], v15, off offset:1832
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v10, off offset:46
-; ALIGNED-NEXT:    global_store_byte v[12:13], v10, off offset:44
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v14, off offset:1838
+; ALIGNED-NEXT:    global_store_byte v[0:1], v14, off offset:1836
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v9, off offset:34
-; ALIGNED-NEXT:    global_store_byte v[12:13], v9, off offset:32
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v13, off offset:1826
+; ALIGNED-NEXT:    global_store_byte v[0:1], v13, off offset:1824
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v8, off offset:38
-; ALIGNED-NEXT:    global_store_byte v[12:13], v8, off offset:36
-; ALIGNED-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:496
-; ALIGNED-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:500
-; ALIGNED-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:504
-; ALIGNED-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:508
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v12, off offset:1830
+; ALIGNED-NEXT:    global_store_byte v[0:1], v12, off offset:1828
+; ALIGNED-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:496
+; ALIGNED-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:500
+; ALIGNED-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:504
+; ALIGNED-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:508
 ; ALIGNED-NEXT:    s_clause 0x3
-; ALIGNED-NEXT:    buffer_load_dword v7, off, s[0:3], s32 offset:508
-; ALIGNED-NEXT:    buffer_load_dword v6, off, s[0:3], s32 offset:504
-; ALIGNED-NEXT:    buffer_load_dword v5, off, s[0:3], s32 offset:500
-; ALIGNED-NEXT:    buffer_load_dword v4, off, s[0:3], s32 offset:496
+; ALIGNED-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:508
+; ALIGNED-NEXT:    buffer_load_dword v10, off, s[0:3], s32 offset:504
+; ALIGNED-NEXT:    buffer_load_dword v9, off, s[0:3], s32 offset:500
+; ALIGNED-NEXT:    buffer_load_dword v8, off, s[0:3], s32 offset:496
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v7, off offset:30
-; ALIGNED-NEXT:    global_store_byte v[12:13], v7, off offset:28
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v11, off offset:1822
+; ALIGNED-NEXT:    global_store_byte v[0:1], v11, off offset:1820
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v6, off offset:26
-; ALIGNED-NEXT:    global_store_byte v[12:13], v6, off offset:24
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v10, off offset:1818
+; ALIGNED-NEXT:    global_store_byte v[0:1], v10, off offset:1816
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v5, off offset:22
-; ALIGNED-NEXT:    global_store_byte v[12:13], v5, off offset:20
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v9, off offset:1814
+; ALIGNED-NEXT:    global_store_byte v[0:1], v9, off offset:1812
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v4, off offset:18
-; ALIGNED-NEXT:    global_store_byte v[12:13], v4, off offset:16
-; ALIGNED-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:512
-; ALIGNED-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:516
-; ALIGNED-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:520
-; ALIGNED-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:524
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v8, off offset:1810
+; ALIGNED-NEXT:    global_store_byte v[0:1], v8, off offset:1808
+; ALIGNED-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:512
+; ALIGNED-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:516
+; ALIGNED-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:520
+; ALIGNED-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:524
 ; ALIGNED-NEXT:    s_clause 0x3
-; ALIGNED-NEXT:    buffer_load_dword v3, off, s[0:3], s32 offset:524
-; ALIGNED-NEXT:    buffer_load_dword v2, off, s[0:3], s32 offset:520
-; ALIGNED-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:516
-; ALIGNED-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:512
-; ALIGNED-NEXT:    global_store_byte v[12:13], v100, off offset:255
+; ALIGNED-NEXT:    buffer_load_dword v7, off, s[0:3], s32 offset:524
+; ALIGNED-NEXT:    buffer_load_dword v6, off, s[0:3], s32 offset:520
+; ALIGNED-NEXT:    buffer_load_dword v5, off, s[0:3], s32 offset:516
+; ALIGNED-NEXT:    buffer_load_dword v4, off, s[0:3], s32 offset:512
+; ALIGNED-NEXT:    global_store_byte v[0:1], v100, off offset:2047
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v100, 24, v81
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v81, 8, v81
-; ALIGNED-NEXT:    global_store_byte v[12:13], v33, off offset:253
+; ALIGNED-NEXT:    global_store_byte v[0:1], v33, off offset:2045
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v33, 24, v80
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v80, 8, v80
-; ALIGNED-NEXT:    global_store_byte v[12:13], v101, off offset:251
+; ALIGNED-NEXT:    global_store_byte v[0:1], v101, off offset:2043
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v101, 24, v67
-; ALIGNED-NEXT:    global_store_byte v[12:13], v81, off offset:221
+; ALIGNED-NEXT:    global_store_byte v[0:1], v81, off offset:2013
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v81, 24, v70
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v70, 8, v70
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v67, 8, v67
-; ALIGNED-NEXT:    global_store_byte v[12:13], v32, off offset:249
+; ALIGNED-NEXT:    global_store_byte v[0:1], v32, off offset:2041
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v32, 24, v66
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v66, 8, v66
-; ALIGNED-NEXT:    global_store_byte v[12:13], v102, off offset:247
+; ALIGNED-NEXT:    global_store_byte v[0:1], v102, off offset:2039
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v102, 24, v98
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v98, 8, v98
-; ALIGNED-NEXT:    global_store_byte v[12:13], v27, off offset:245
+; ALIGNED-NEXT:    global_store_byte v[0:1], v27, off offset:2037
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v27, 24, v87
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v87, 8, v87
-; ALIGNED-NEXT:    global_store_byte v[12:13], v103, off offset:243
+; ALIGNED-NEXT:    global_store_byte v[0:1], v103, off offset:2035
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v103, 24, v86
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v86, 8, v86
-; ALIGNED-NEXT:    global_store_byte v[12:13], v26, off offset:241
+; ALIGNED-NEXT:    global_store_byte v[0:1], v26, off offset:2033
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v26, 24, v82
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v82, 8, v82
-; ALIGNED-NEXT:    global_store_byte v[12:13], v112, off offset:239
+; ALIGNED-NEXT:    global_store_byte v[0:1], v112, off offset:2031
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v112, 24, v99
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v99, 8, v99
-; ALIGNED-NEXT:    global_store_byte v[12:13], v53, off offset:237
+; ALIGNED-NEXT:    global_store_byte v[0:1], v53, off offset:2029
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v53, 24, v96
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v96, 8, v96
-; ALIGNED-NEXT:    global_store_byte v[12:13], v113, off offset:235
+; ALIGNED-NEXT:    global_store_byte v[0:1], v113, off offset:2027
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v113, 24, v83
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v83, 8, v83
-; ALIGNED-NEXT:    global_store_byte v[12:13], v52, off offset:233
+; ALIGNED-NEXT:    global_store_byte v[0:1], v52, off offset:2025
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v52, 24, v68
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v68, 8, v68
-; ALIGNED-NEXT:    global_store_byte v[12:13], v114, off offset:231
+; ALIGNED-NEXT:    global_store_byte v[0:1], v114, off offset:2023
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v114, 24, v97
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v97, 8, v97
-; ALIGNED-NEXT:    global_store_byte v[12:13], v51, off offset:229
+; ALIGNED-NEXT:    global_store_byte v[0:1], v51, off offset:2021
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v51, 24, v84
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v84, 8, v84
-; ALIGNED-NEXT:    global_store_byte v[12:13], v115, off offset:227
+; ALIGNED-NEXT:    global_store_byte v[0:1], v115, off offset:2019
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v115, 24, v69
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v69, 8, v69
-; ALIGNED-NEXT:    global_store_byte v[12:13], v50, off offset:225
+; ALIGNED-NEXT:    global_store_byte v[0:1], v50, off offset:2017
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v50, 24, v54
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v54, 8, v54
-; ALIGNED-NEXT:    global_store_byte v[12:13], v100, off offset:223
+; ALIGNED-NEXT:    global_store_byte v[0:1], v100, off offset:2015
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v100, 24, v85
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v85, 8, v85
-; ALIGNED-NEXT:    global_store_byte v[12:13], v33, off offset:219
+; ALIGNED-NEXT:    global_store_byte v[0:1], v33, off offset:2011
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v33, 24, v55
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v55, 8, v55
-; ALIGNED-NEXT:    global_store_byte v[12:13], v80, off offset:217
+; ALIGNED-NEXT:    global_store_byte v[0:1], v80, off offset:2009
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v80, 24, v38
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v38, 8, v38
-; ALIGNED-NEXT:    global_store_byte v[12:13], v101, off offset:215
+; ALIGNED-NEXT:    global_store_byte v[0:1], v101, off offset:2007
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v101, 24, v71
-; ALIGNED-NEXT:    global_store_byte v[12:13], v70, off offset:153
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v70, 24, v4
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v4, 8, v4
+; ALIGNED-NEXT:    global_store_byte v[0:1], v70, off offset:1945
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v70, 24, v8
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v8, 8, v8
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v71, 8, v71
-; ALIGNED-NEXT:    global_store_byte v[12:13], v67, off offset:213
+; ALIGNED-NEXT:    global_store_byte v[0:1], v67, off offset:2005
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v67, 24, v64
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v64, 8, v64
-; ALIGNED-NEXT:    global_store_byte v[12:13], v32, off offset:211
+; ALIGNED-NEXT:    global_store_byte v[0:1], v32, off offset:2003
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v32, 24, v39
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v39, 8, v39
-; ALIGNED-NEXT:    global_store_byte v[12:13], v66, off offset:209
+; ALIGNED-NEXT:    global_store_byte v[0:1], v66, off offset:2001
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v66, 24, v34
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v34, 8, v34
-; ALIGNED-NEXT:    global_store_byte v[12:13], v102, off offset:207
+; ALIGNED-NEXT:    global_store_byte v[0:1], v102, off offset:1999
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v102, 24, v65
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v65, 8, v65
-; ALIGNED-NEXT:    global_store_byte v[12:13], v98, off offset:205
+; ALIGNED-NEXT:    global_store_byte v[0:1], v98, off offset:1997
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v98, 24, v48
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v48, 8, v48
-; ALIGNED-NEXT:    global_store_byte v[12:13], v27, off offset:203
+; ALIGNED-NEXT:    global_store_byte v[0:1], v27, off offset:1995
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v27, 24, v35
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v35, 8, v35
-; ALIGNED-NEXT:    global_store_byte v[12:13], v87, off offset:201
+; ALIGNED-NEXT:    global_store_byte v[0:1], v87, off offset:1993
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v87, 24, v28
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v28, 8, v28
-; ALIGNED-NEXT:    global_store_byte v[12:13], v103, off offset:199
+; ALIGNED-NEXT:    global_store_byte v[0:1], v103, off offset:1991
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v103, 24, v49
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v49, 8, v49
-; ALIGNED-NEXT:    global_store_byte v[12:13], v86, off offset:197
+; ALIGNED-NEXT:    global_store_byte v[0:1], v86, off offset:1989
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v86, 24, v36
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v36, 8, v36
-; ALIGNED-NEXT:    global_store_byte v[12:13], v26, off offset:195
+; ALIGNED-NEXT:    global_store_byte v[0:1], v26, off offset:1987
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v26, 24, v29
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v29, 8, v29
-; ALIGNED-NEXT:    global_store_byte v[12:13], v82, off offset:193
+; ALIGNED-NEXT:    global_store_byte v[0:1], v82, off offset:1985
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v82, 24, v22
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v22, 8, v22
-; ALIGNED-NEXT:    global_store_byte v[12:13], v112, off offset:191
+; ALIGNED-NEXT:    global_store_byte v[0:1], v112, off offset:1983
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v112, 24, v37
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v37, 8, v37
-; ALIGNED-NEXT:    global_store_byte v[12:13], v99, off offset:189
+; ALIGNED-NEXT:    global_store_byte v[0:1], v99, off offset:1981
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v99, 24, v30
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v30, 8, v30
-; ALIGNED-NEXT:    global_store_byte v[12:13], v53, off offset:187
+; ALIGNED-NEXT:    global_store_byte v[0:1], v53, off offset:1979
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v53, 24, v23
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v23, 8, v23
-; ALIGNED-NEXT:    global_store_byte v[12:13], v96, off offset:185
+; ALIGNED-NEXT:    global_store_byte v[0:1], v96, off offset:1977
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v96, 24, v19
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v19, 8, v19
-; ALIGNED-NEXT:    global_store_byte v[12:13], v113, off offset:183
+; ALIGNED-NEXT:    global_store_byte v[0:1], v113, off offset:1975
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v113, 24, v31
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v31, 8, v31
-; ALIGNED-NEXT:    global_store_byte v[12:13], v83, off offset:181
+; ALIGNED-NEXT:    global_store_byte v[0:1], v83, off offset:1973
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v83, 24, v24
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v24, 8, v24
-; ALIGNED-NEXT:    global_store_byte v[12:13], v52, off offset:179
+; ALIGNED-NEXT:    global_store_byte v[0:1], v52, off offset:1971
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v52, 24, v20
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v20, 8, v20
-; ALIGNED-NEXT:    global_store_byte v[12:13], v68, off offset:177
+; ALIGNED-NEXT:    global_store_byte v[0:1], v68, off offset:1969
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v68, 24, v17
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v17, 8, v17
-; ALIGNED-NEXT:    global_store_byte v[12:13], v114, off offset:175
+; ALIGNED-NEXT:    global_store_byte v[0:1], v114, off offset:1967
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v114, 24, v25
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v25, 8, v25
-; ALIGNED-NEXT:    global_store_byte v[12:13], v97, off offset:173
+; ALIGNED-NEXT:    global_store_byte v[0:1], v97, off offset:1965
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v97, 24, v21
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v21, 8, v21
-; ALIGNED-NEXT:    global_store_byte v[12:13], v51, off offset:171
+; ALIGNED-NEXT:    global_store_byte v[0:1], v51, off offset:1963
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v51, 24, v18
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v18, 8, v18
-; ALIGNED-NEXT:    global_store_byte v[12:13], v84, off offset:169
+; ALIGNED-NEXT:    global_store_byte v[0:1], v84, off offset:1961
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v84, 24, v16
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v16, 8, v16
-; ALIGNED-NEXT:    global_store_byte v[12:13], v115, off offset:167
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v115, 24, v11
+; ALIGNED-NEXT:    global_store_byte v[0:1], v115, off offset:1959
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v115, 24, v15
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v15, 8, v15
+; ALIGNED-NEXT:    global_store_byte v[0:1], v69, off offset:1957
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v69, 24, v14
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v14, 8, v14
+; ALIGNED-NEXT:    global_store_byte v[0:1], v50, off offset:1955
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v50, 24, v13
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v13, 8, v13
+; ALIGNED-NEXT:    global_store_byte v[0:1], v54, off offset:1953
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v54, 24, v12
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v12, 8, v12
+; ALIGNED-NEXT:    global_store_byte v[0:1], v100, off offset:1951
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v100, 24, v11
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v11, 8, v11
-; ALIGNED-NEXT:    global_store_byte v[12:13], v69, off offset:165
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v69, 24, v10
+; ALIGNED-NEXT:    global_store_byte v[0:1], v85, off offset:1949
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v85, 24, v10
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v10, 8, v10
-; ALIGNED-NEXT:    global_store_byte v[12:13], v50, off offset:163
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v50, 24, v9
+; ALIGNED-NEXT:    global_store_byte v[0:1], v81, off offset:1947
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v81, 24, v9
 ; ALIGNED-NEXT:    v_lshrrev_b32_e32 v9, 8, v9
-; ALIGNED-NEXT:    global_store_byte v[12:13], v54, off offset:161
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v54, 24, v8
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v8, 8, v8
-; ALIGNED-NEXT:    global_store_byte v[12:13], v100, off offset:159
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v100, 24, v7
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v7, 8, v7
-; ALIGNED-NEXT:    global_store_byte v[12:13], v85, off offset:157
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v85, 24, v6
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v6, 8, v6
-; ALIGNED-NEXT:    global_store_byte v[12:13], v81, off offset:155
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v81, 24, v5
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v5, 8, v5
-; ALIGNED-NEXT:    global_store_byte v[12:13], v33, off offset:151
-; ALIGNED-NEXT:    global_store_byte v[12:13], v55, off offset:149
-; ALIGNED-NEXT:    global_store_byte v[12:13], v80, off offset:147
-; ALIGNED-NEXT:    global_store_byte v[12:13], v38, off offset:145
-; ALIGNED-NEXT:    global_store_byte v[12:13], v101, off offset:143
-; ALIGNED-NEXT:    global_store_byte v[12:13], v71, off offset:141
-; ALIGNED-NEXT:    global_store_byte v[12:13], v67, off offset:139
-; ALIGNED-NEXT:    global_store_byte v[12:13], v64, off offset:137
-; ALIGNED-NEXT:    global_store_byte v[12:13], v32, off offset:135
-; ALIGNED-NEXT:    global_store_byte v[12:13], v39, off offset:133
-; ALIGNED-NEXT:    global_store_byte v[12:13], v66, off offset:131
-; ALIGNED-NEXT:    global_store_byte v[12:13], v34, off offset:129
-; ALIGNED-NEXT:    global_store_byte v[12:13], v102, off offset:127
-; ALIGNED-NEXT:    global_store_byte v[12:13], v65, off offset:125
-; ALIGNED-NEXT:    global_store_byte v[12:13], v98, off offset:123
-; ALIGNED-NEXT:    global_store_byte v[12:13], v48, off offset:121
-; ALIGNED-NEXT:    global_store_byte v[12:13], v27, off offset:119
-; ALIGNED-NEXT:    global_store_byte v[12:13], v35, off offset:117
-; ALIGNED-NEXT:    global_store_byte v[12:13], v87, off offset:115
-; ALIGNED-NEXT:    global_store_byte v[12:13], v28, off offset:113
-; ALIGNED-NEXT:    global_store_byte v[12:13], v103, off offset:111
-; ALIGNED-NEXT:    global_store_byte v[12:13], v49, off offset:109
-; ALIGNED-NEXT:    global_store_byte v[12:13], v86, off offset:107
-; ALIGNED-NEXT:    global_store_byte v[12:13], v36, off offset:105
-; ALIGNED-NEXT:    global_store_byte v[12:13], v26, off offset:103
-; ALIGNED-NEXT:    global_store_byte v[12:13], v29, off offset:101
-; ALIGNED-NEXT:    global_store_byte v[12:13], v82, off offset:99
-; ALIGNED-NEXT:    global_store_byte v[12:13], v22, off offset:97
-; ALIGNED-NEXT:    global_store_byte v[12:13], v112, off offset:95
-; ALIGNED-NEXT:    global_store_byte v[12:13], v37, off offset:93
-; ALIGNED-NEXT:    global_store_byte v[12:13], v99, off offset:91
-; ALIGNED-NEXT:    global_store_byte v[12:13], v30, off offset:89
-; ALIGNED-NEXT:    global_store_byte v[12:13], v53, off offset:87
-; ALIGNED-NEXT:    global_store_byte v[12:13], v23, off offset:85
-; ALIGNED-NEXT:    global_store_byte v[12:13], v96, off offset:83
-; ALIGNED-NEXT:    global_store_byte v[12:13], v19, off offset:81
-; ALIGNED-NEXT:    global_store_byte v[12:13], v113, off offset:79
-; ALIGNED-NEXT:    global_store_byte v[12:13], v31, off offset:77
-; ALIGNED-NEXT:    global_store_byte v[12:13], v83, off offset:75
-; ALIGNED-NEXT:    global_store_byte v[12:13], v24, off offset:73
-; ALIGNED-NEXT:    global_store_byte v[12:13], v52, off offset:71
-; ALIGNED-NEXT:    global_store_byte v[12:13], v20, off offset:69
-; ALIGNED-NEXT:    global_store_byte v[12:13], v68, off offset:67
-; ALIGNED-NEXT:    global_store_byte v[12:13], v17, off offset:65
-; ALIGNED-NEXT:    global_store_byte v[12:13], v114, off offset:63
-; ALIGNED-NEXT:    global_store_byte v[12:13], v25, off offset:61
-; ALIGNED-NEXT:    global_store_byte v[12:13], v97, off offset:59
-; ALIGNED-NEXT:    global_store_byte v[12:13], v21, off offset:57
-; ALIGNED-NEXT:    global_store_byte v[12:13], v51, off offset:55
-; ALIGNED-NEXT:    global_store_byte v[12:13], v18, off offset:53
-; ALIGNED-NEXT:    global_store_byte v[12:13], v84, off offset:51
-; ALIGNED-NEXT:    global_store_byte v[12:13], v16, off offset:49
-; ALIGNED-NEXT:    global_store_byte v[12:13], v115, off offset:43
-; ALIGNED-NEXT:    global_store_byte v[12:13], v11, off offset:41
-; ALIGNED-NEXT:    global_store_byte v[12:13], v69, off offset:47
-; ALIGNED-NEXT:    global_store_byte v[12:13], v10, off offset:45
-; ALIGNED-NEXT:    global_store_byte v[12:13], v50, off offset:35
-; ALIGNED-NEXT:    global_store_byte v[12:13], v9, off offset:33
-; ALIGNED-NEXT:    global_store_byte v[12:13], v54, off offset:39
-; ALIGNED-NEXT:    global_store_byte v[12:13], v8, off offset:37
-; ALIGNED-NEXT:    global_store_byte v[12:13], v100, off offset:31
-; ALIGNED-NEXT:    global_store_byte v[12:13], v7, off offset:29
-; ALIGNED-NEXT:    global_store_byte v[12:13], v85, off offset:27
-; ALIGNED-NEXT:    global_store_byte v[12:13], v6, off offset:25
-; ALIGNED-NEXT:    global_store_byte v[12:13], v81, off offset:23
-; ALIGNED-NEXT:    global_store_byte v[12:13], v5, off offset:21
-; ALIGNED-NEXT:    global_store_byte v[12:13], v70, off offset:19
-; ALIGNED-NEXT:    global_store_byte v[12:13], v4, off offset:17
+; ALIGNED-NEXT:    global_store_byte v[0:1], v33, off offset:1943
+; ALIGNED-NEXT:    global_store_byte v[0:1], v55, off offset:1941
+; ALIGNED-NEXT:    global_store_byte v[0:1], v80, off offset:1939
+; ALIGNED-NEXT:    global_store_byte v[0:1], v38, off offset:1937
+; ALIGNED-NEXT:    global_store_byte v[0:1], v101, off offset:1935
+; ALIGNED-NEXT:    global_store_byte v[0:1], v71, off offset:1933
+; ALIGNED-NEXT:    global_store_byte v[0:1], v67, off offset:1931
+; ALIGNED-NEXT:    global_store_byte v[0:1], v64, off offset:1929
+; ALIGNED-NEXT:    global_store_byte v[0:1], v32, off offset:1927
+; ALIGNED-NEXT:    global_store_byte v[0:1], v39, off offset:1925
+; ALIGNED-NEXT:    global_store_byte v[0:1], v66, off offset:1923
+; ALIGNED-NEXT:    global_store_byte v[0:1], v34, off offset:1921
+; ALIGNED-NEXT:    global_store_byte v[0:1], v102, off offset:1919
+; ALIGNED-NEXT:    global_store_byte v[0:1], v65, off offset:1917
+; ALIGNED-NEXT:    global_store_byte v[0:1], v98, off offset:1915
+; ALIGNED-NEXT:    global_store_byte v[0:1], v48, off offset:1913
+; ALIGNED-NEXT:    global_store_byte v[0:1], v27, off offset:1911
+; ALIGNED-NEXT:    global_store_byte v[0:1], v35, off offset:1909
+; ALIGNED-NEXT:    global_store_byte v[0:1], v87, off offset:1907
+; ALIGNED-NEXT:    global_store_byte v[0:1], v28, off offset:1905
+; ALIGNED-NEXT:    global_store_byte v[0:1], v103, off offset:1903
+; ALIGNED-NEXT:    global_store_byte v[0:1], v49, off offset:1901
+; ALIGNED-NEXT:    global_store_byte v[0:1], v86, off offset:1899
+; ALIGNED-NEXT:    global_store_byte v[0:1], v36, off offset:1897
+; ALIGNED-NEXT:    global_store_byte v[0:1], v26, off offset:1895
+; ALIGNED-NEXT:    global_store_byte v[0:1], v29, off offset:1893
+; ALIGNED-NEXT:    global_store_byte v[0:1], v82, off offset:1891
+; ALIGNED-NEXT:    global_store_byte v[0:1], v22, off offset:1889
+; ALIGNED-NEXT:    global_store_byte v[0:1], v112, off offset:1887
+; ALIGNED-NEXT:    global_store_byte v[0:1], v37, off offset:1885
+; ALIGNED-NEXT:    global_store_byte v[0:1], v99, off offset:1883
+; ALIGNED-NEXT:    global_store_byte v[0:1], v30, off offset:1881
+; ALIGNED-NEXT:    global_store_byte v[0:1], v53, off offset:1879
+; ALIGNED-NEXT:    global_store_byte v[0:1], v23, off offset:1877
+; ALIGNED-NEXT:    global_store_byte v[0:1], v96, off offset:1875
+; ALIGNED-NEXT:    global_store_byte v[0:1], v19, off offset:1873
+; ALIGNED-NEXT:    global_store_byte v[0:1], v113, off offset:1871
+; ALIGNED-NEXT:    global_store_byte v[0:1], v31, off offset:1869
+; ALIGNED-NEXT:    global_store_byte v[0:1], v83, off offset:1867
+; ALIGNED-NEXT:    global_store_byte v[0:1], v24, off offset:1865
+; ALIGNED-NEXT:    global_store_byte v[0:1], v52, off offset:1863
+; ALIGNED-NEXT:    global_store_byte v[0:1], v20, off offset:1861
+; ALIGNED-NEXT:    global_store_byte v[0:1], v68, off offset:1859
+; ALIGNED-NEXT:    global_store_byte v[0:1], v17, off offset:1857
+; ALIGNED-NEXT:    global_store_byte v[0:1], v114, off offset:1855
+; ALIGNED-NEXT:    global_store_byte v[0:1], v25, off offset:1853
+; ALIGNED-NEXT:    global_store_byte v[0:1], v97, off offset:1851
+; ALIGNED-NEXT:    global_store_byte v[0:1], v21, off offset:1849
+; ALIGNED-NEXT:    global_store_byte v[0:1], v51, off offset:1847
+; ALIGNED-NEXT:    global_store_byte v[0:1], v18, off offset:1845
+; ALIGNED-NEXT:    global_store_byte v[0:1], v84, off offset:1843
+; ALIGNED-NEXT:    global_store_byte v[0:1], v16, off offset:1841
+; ALIGNED-NEXT:    global_store_byte v[0:1], v115, off offset:1835
+; ALIGNED-NEXT:    global_store_byte v[0:1], v15, off offset:1833
+; ALIGNED-NEXT:    global_store_byte v[0:1], v69, off offset:1839
+; ALIGNED-NEXT:    global_store_byte v[0:1], v14, off offset:1837
+; ALIGNED-NEXT:    global_store_byte v[0:1], v50, off offset:1827
+; ALIGNED-NEXT:    global_store_byte v[0:1], v13, off offset:1825
+; ALIGNED-NEXT:    global_store_byte v[0:1], v54, off offset:1831
+; ALIGNED-NEXT:    global_store_byte v[0:1], v12, off offset:1829
+; ALIGNED-NEXT:    global_store_byte v[0:1], v100, off offset:1823
+; ALIGNED-NEXT:    global_store_byte v[0:1], v11, off offset:1821
+; ALIGNED-NEXT:    global_store_byte v[0:1], v85, off offset:1819
+; ALIGNED-NEXT:    global_store_byte v[0:1], v10, off offset:1817
+; ALIGNED-NEXT:    global_store_byte v[0:1], v81, off offset:1815
+; ALIGNED-NEXT:    global_store_byte v[0:1], v9, off offset:1813
+; ALIGNED-NEXT:    global_store_byte v[0:1], v70, off offset:1811
+; ALIGNED-NEXT:    global_store_byte v[0:1], v8, off offset:1809
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(3)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v3, off offset:14
-; ALIGNED-NEXT:    global_store_byte v[12:13], v3, off offset:12
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v7, off offset:1806
+; ALIGNED-NEXT:    global_store_byte v[0:1], v7, off offset:1804
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(2)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v2, off offset:10
-; ALIGNED-NEXT:    global_store_byte v[12:13], v2, off offset:8
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v6, off offset:1802
+; ALIGNED-NEXT:    global_store_byte v[0:1], v6, off offset:1800
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(1)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v1, off offset:6
-; ALIGNED-NEXT:    global_store_byte v[12:13], v1, off offset:4
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v5, off offset:1798
+; ALIGNED-NEXT:    global_store_byte v[0:1], v5, off offset:1796
 ; ALIGNED-NEXT:    s_waitcnt vmcnt(0)
-; ALIGNED-NEXT:    global_store_byte_d16_hi v[12:13], v0, off offset:2
-; ALIGNED-NEXT:    global_store_byte v[12:13], v0, off
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v4, 24, v3
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v3, 8, v3
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v5, 24, v2
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v2, 8, v2
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v6, 24, v1
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v1, 8, v1
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v7, 24, v0
-; ALIGNED-NEXT:    v_lshrrev_b32_e32 v0, 8, v0
-; ALIGNED-NEXT:    global_store_byte v[12:13], v4, off offset:15
-; ALIGNED-NEXT:    global_store_byte v[12:13], v3, off offset:13
-; ALIGNED-NEXT:    global_store_byte v[12:13], v5, off offset:11
-; ALIGNED-NEXT:    global_store_byte v[12:13], v2, off offset:9
-; ALIGNED-NEXT:    global_store_byte v[12:13], v6, off offset:7
-; ALIGNED-NEXT:    global_store_byte v[12:13], v1, off offset:5
-; ALIGNED-NEXT:    global_store_byte v[12:13], v7, off offset:3
-; ALIGNED-NEXT:    global_store_byte v[12:13], v0, off offset:1
-; ALIGNED-NEXT:    v_add_co_u32 v12, vcc_lo, v12, 0xffffff00
-; ALIGNED-NEXT:    v_add_co_ci_u32_e64 v13, null, -1, v13, vcc_lo
+; ALIGNED-NEXT:    global_store_byte_d16_hi v[0:1], v4, off offset:1794
+; ALIGNED-NEXT:    global_store_byte v[0:1], v4, off offset:1792
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v8, 24, v7
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v7, 8, v7
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v9, 24, v6
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v6, 8, v6
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v10, 24, v5
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v5, 8, v5
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v11, 24, v4
+; ALIGNED-NEXT:    v_lshrrev_b32_e32 v4, 8, v4
+; ALIGNED-NEXT:    global_store_byte v[0:1], v8, off offset:1807
+; ALIGNED-NEXT:    global_store_byte v[0:1], v7, off offset:1805
+; ALIGNED-NEXT:    global_store_byte v[0:1], v9, off offset:1803
+; ALIGNED-NEXT:    global_store_byte v[0:1], v6, off offset:1801
+; ALIGNED-NEXT:    global_store_byte v[0:1], v10, off offset:1799
+; ALIGNED-NEXT:    global_store_byte v[0:1], v5, off offset:1797
+; ALIGNED-NEXT:    global_store_byte v[0:1], v11, off offset:1795
+; ALIGNED-NEXT:    global_store_byte v[0:1], v4, off offset:1793
+; ALIGNED-NEXT:    v_add_co_u32 v0, vcc_lo, v0, 0xffffff00
+; ALIGNED-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v1, vcc_lo
 ; ALIGNED-NEXT:    s_cbranch_scc0 .LBB6_5
 ; ALIGNED-NEXT:  .LBB6_6: ; %Flow14
 ; ALIGNED-NEXT:    s_or_b32 exec_lo, exec_lo, s6
@@ -8405,29 +8397,25 @@ define void @memmove_p1_p1_sz2048(ptr addrspace(1) align 1 %dst, ptr addrspace(1
 ; UNROLL3-NEXT:    s_waitcnt vmcnt(0)
 ; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off offset:2032
 ; UNROLL3-NEXT:    global_load_dwordx4 v[4:7], v[2:3], off offset:2016
-; UNROLL3-NEXT:    v_add_co_u32 v0, vcc_lo, v0, 0x7b0
-; UNROLL3-NEXT:    v_add_co_ci_u32_e64 v1, null, 0, v1, vcc_lo
-; UNROLL3-NEXT:    v_add_co_u32 v2, vcc_lo, v2, 0x7b0
-; UNROLL3-NEXT:    v_add_co_ci_u32_e64 v3, null, 0, v3, vcc_lo
 ; UNROLL3-NEXT:    s_waitcnt vmcnt(0)
-; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off offset:48
+; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off offset:2016
 ; UNROLL3-NEXT:    .p2align 6
 ; UNROLL3-NEXT:  .LBB6_6: ; %memmove_bwd_loop
 ; UNROLL3-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; UNROLL3-NEXT:    s_clause 0x2
-; UNROLL3-NEXT:    global_load_dwordx4 v[4:7], v[2:3], off
-; UNROLL3-NEXT:    global_load_dwordx4 v[8:11], v[2:3], off offset:16
-; UNROLL3-NEXT:    global_load_dwordx4 v[12:15], v[2:3], off offset:32
+; UNROLL3-NEXT:    global_load_dwordx4 v[4:7], v[2:3], off offset:1968
+; UNROLL3-NEXT:    global_load_dwordx4 v[8:11], v[2:3], off offset:1984
+; UNROLL3-NEXT:    global_load_dwordx4 v[12:15], v[2:3], off offset:2000
 ; UNROLL3-NEXT:    v_add_co_u32 v2, vcc_lo, v2, 0xffffffd0
 ; UNROLL3-NEXT:    v_add_co_ci_u32_e64 v3, null, -1, v3, vcc_lo
 ; UNROLL3-NEXT:    s_add_u32 s4, s4, 48
 ; UNROLL3-NEXT:    s_addc_u32 s5, s5, 0
 ; UNROLL3-NEXT:    s_waitcnt vmcnt(2)
-; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off
+; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[4:7], off offset:1968
 ; UNROLL3-NEXT:    s_waitcnt vmcnt(1)
-; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[8:11], off offset:16
+; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[8:11], off offset:1984
 ; UNROLL3-NEXT:    s_waitcnt vmcnt(0)
-; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[12:15], off offset:32
+; UNROLL3-NEXT:    global_store_dwordx4 v[0:1], v[12:15], off offset:2000
 ; UNROLL3-NEXT:    v_add_co_u32 v0, vcc_lo, v0, 0xffffffd0
 ; UNROLL3-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v1, vcc_lo
 ; UNROLL3-NEXT:    s_cmp_eq_u64 s[4:5], 0

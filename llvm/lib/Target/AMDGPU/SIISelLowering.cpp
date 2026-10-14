@@ -2022,10 +2022,13 @@ bool SITargetLowering::getAddrModeArguments(const IntrinsicInst *II,
 
 bool SITargetLowering::isLegalFlatAddressingMode(const AddrMode &AM,
                                                  unsigned AddrSpace) const {
+  // A scale of 1 without a base register is just a base register.
+  bool SingleReg = AM.Scale == 0 || (AM.Scale == 1 && !AM.HasBaseReg);
+
   if (!Subtarget->hasFlatInstOffsets()) {
     // Flat instructions do not have offsets, and only have the register
     // address.
-    return AM.BaseOffs == 0 && AM.Scale == 0;
+    return AM.BaseOffs == 0 && SingleReg;
   }
 
   using AMDGPU::FlatAddrSpace;
@@ -2034,9 +2037,17 @@ bool SITargetLowering::isLegalFlatAddressingMode(const AddrMode &AM,
       : AddrSpace == AMDGPUAS::PRIVATE_ADDRESS ? FlatAddrSpace::FlatScratch
                                                : FlatAddrSpace::FLAT;
 
-  return AM.Scale == 0 &&
-         (AM.BaseOffs == 0 || Subtarget->getInstrInfo()->isLegalFLATOffset(
-                                  AM.BaseOffs, AddrSpace, FlatVariant));
+  if (!SingleReg)
+    return false;
+  if (AM.BaseOffs == 0)
+    return true;
+  // A FLAT instruction folds an offset only from an inbounds GEP. LSR gives
+  // its single register as a scale of 1, and it expands the offset into a GEP
+  // without inbounds.
+  if (AM.Scale == 1 && FlatVariant == FlatAddrSpace::FLAT)
+    return false;
+  return Subtarget->getInstrInfo()->isLegalFLATOffset(AM.BaseOffs, AddrSpace,
+                                                      FlatVariant);
 }
 
 bool SITargetLowering::isLegalGlobalAddressingMode(const AddrMode &AM) const {

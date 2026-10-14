@@ -22,8 +22,6 @@ define amdgpu_kernel void @store_half_pairs(ptr addrspace(1) noalias %out, ptr a
 ; GFX90A-NEXT:    v_mov_b32_e32 v3, s9
 ; GFX90A-NEXT:    v_add_co_u32_e32 v2, vcc, s8, v2
 ; GFX90A-NEXT:    v_addc_co_u32_e32 v3, vcc, 0, v3, vcc
-; GFX90A-NEXT:    v_add_co_u32_e32 v2, vcc, 2, v2
-; GFX90A-NEXT:    v_addc_co_u32_e32 v3, vcc, 0, v3, vcc
 ; GFX90A-NEXT:    s_lshl_b64 s[0:1], s[14:15], 2
 ; GFX90A-NEXT:    v_mov_b32_e32 v5, s11
 ; GFX90A-NEXT:    v_add_co_u32_e32 v4, vcc, s10, v4
@@ -46,7 +44,7 @@ define amdgpu_kernel void @store_half_pairs(ptr addrspace(1) noalias %out, ptr a
 ; GFX90A-NEXT:    v_cvt_f16_f32_e32 v9, v10
 ; GFX90A-NEXT:    v_cvt_f16_f32_e32 v10, v11
 ; GFX90A-NEXT:    v_pack_b32_f16 v9, v9, v10
-; GFX90A-NEXT:    global_store_dword v[2:3], v9, off offset:-2
+; GFX90A-NEXT:    global_store_dword v[2:3], v9, off
 ; GFX90A-NEXT:    v_add_co_u32_e32 v2, vcc, s0, v2
 ; GFX90A-NEXT:    v_addc_co_u32_e32 v3, vcc, v3, v7, vcc
 ; GFX90A-NEXT:    s_andn2_b64 exec, exec, s[4:5]
@@ -61,11 +59,10 @@ define amdgpu_kernel void @store_half_pairs(ptr addrspace(1) noalias %out, ptr a
 ; GFX942-NEXT:    v_and_b32_e32 v0, 0x3ff, v0
 ; GFX942-NEXT:    v_lshlrev_b32_e32 v2, 2, v0
 ; GFX942-NEXT:    v_mov_b32_e32 v3, v1
-; GFX942-NEXT:    s_waitcnt lgkmcnt(0)
-; GFX942-NEXT:    v_lshl_add_u64 v[2:3], s[8:9], 0, v[2:3]
 ; GFX942-NEXT:    v_lshlrev_b32_e32 v4, 3, v0
 ; GFX942-NEXT:    v_mov_b32_e32 v5, v1
-; GFX942-NEXT:    v_lshl_add_u64 v[2:3], v[2:3], 0, 2
+; GFX942-NEXT:    s_waitcnt lgkmcnt(0)
+; GFX942-NEXT:    v_lshl_add_u64 v[2:3], s[8:9], 0, v[2:3]
 ; GFX942-NEXT:    s_lshl_b64 s[0:1], s[14:15], 2
 ; GFX942-NEXT:    v_lshl_add_u64 v[4:5], s[10:11], 0, v[4:5]
 ; GFX942-NEXT:    s_lshl_b64 s[2:3], s[14:15], 3
@@ -81,7 +78,7 @@ define amdgpu_kernel void @store_half_pairs(ptr addrspace(1) noalias %out, ptr a
 ; GFX942-NEXT:    v_cvt_f16_f32_e32 v6, v6
 ; GFX942-NEXT:    v_cvt_f16_f32_e32 v7, v7
 ; GFX942-NEXT:    v_pack_b32_f16 v6, v6, v7
-; GFX942-NEXT:    global_store_dword v[2:3], v6, off offset:-2
+; GFX942-NEXT:    global_store_dword v[2:3], v6, off
 ; GFX942-NEXT:    v_lshl_add_u64 v[2:3], v[2:3], 0, s[0:1]
 ; GFX942-NEXT:    s_andn2_b64 exec, exec, s[4:5]
 ; GFX942-NEXT:    s_cbranch_execnz .LBB0_1
@@ -98,8 +95,6 @@ define amdgpu_kernel void @store_half_pairs(ptr addrspace(1) noalias %out, ptr a
 ; GFX1030-NEXT:    v_add_co_u32 v2, s0, s0, v2
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v3, null, s1, 0, s0
 ; GFX1030-NEXT:    v_add_co_u32 v4, s0, s2, v4
-; GFX1030-NEXT:    v_add_co_u32 v2, vcc_lo, v2, 2
-; GFX1030-NEXT:    v_add_co_ci_u32_e64 v3, null, 0, v3, vcc_lo
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v5, null, s3, 0, s0
 ; GFX1030-NEXT:    s_lshl_b64 s[2:3], s[6:7], 2
 ; GFX1030-NEXT:    s_lshl_b64 s[8:9], s[6:7], 3
@@ -118,7 +113,7 @@ define amdgpu_kernel void @store_half_pairs(ptr addrspace(1) noalias %out, ptr a
 ; GFX1030-NEXT:    v_cvt_f16_f32_e32 v6, v6
 ; GFX1030-NEXT:    v_cvt_f16_f32_e32 v7, v7
 ; GFX1030-NEXT:    v_pack_b32_f16 v6, v6, v7
-; GFX1030-NEXT:    global_store_dword v[2:3], v6, off offset:-2
+; GFX1030-NEXT:    global_store_dword v[2:3], v6, off
 ; GFX1030-NEXT:    v_add_co_u32 v2, s0, v2, s2
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v3, null, s3, v3, s0
 ; GFX1030-NEXT:    s_andn2_b32 exec_lo, exec_lo, s1
