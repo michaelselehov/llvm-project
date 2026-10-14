@@ -4950,6 +4950,19 @@ void LSRInstance::NarrowSearchSpaceByDetectingSupersets() {
 
 /// When there are many registers for expressions like A, A+1, A+2, etc.,
 /// allocate a single register for them.
+/// Return the smallest alignment of the memory accesses that use \p LU as their
+/// address, or std::nullopt if some fixup of \p LU is not such an access.
+static std::optional<Align> getMinAccessAlign(const LSRUse &LU) {
+  std::optional<Align> MinAlign;
+  for (const LSRFixup &Fixup : LU.Fixups) {
+    if (getLoadStorePointerOperand(Fixup.UserInst) != Fixup.OperandValToReplace)
+      return std::nullopt;
+    Align A = getLoadStoreAlignment(Fixup.UserInst);
+    MinAlign = MinAlign ? std::min(*MinAlign, A) : A;
+  }
+  return MinAlign;
+}
+
 void LSRInstance::NarrowSearchSpaceByCollapsingUnrolledCode() {
   if (EstimateSearchSpaceComplexity() < Opts.lsr_complexity_limit)
     return;
@@ -4961,6 +4974,10 @@ void LSRInstance::NarrowSearchSpaceByCollapsingUnrolledCode() {
 
   // This is especially useful for unrolled loops.
 
+  // In the first round, do not collapse a use into a less aligned one. The
+  // register of the remaining use becomes the shared base, and a misaligned
+  // base can be slower even if every final address is aligned.
+  for (bool KeepAlignedUses : {true, false})
   for (size_t LUIdx = 0, NumUses = Uses.size(); LUIdx != NumUses; ++LUIdx) {
     LSRUse &LU = Uses[LUIdx];
     for (const Formula &F : LU.Formulae) {
@@ -4972,6 +4989,13 @@ void LSRInstance::NarrowSearchSpaceByCollapsingUnrolledCode() {
       LSRUse *LUThatHas = FindUseWithSimilarFormula(F, LU);
       if (!LUThatHas)
         continue;
+
+      if (KeepAlignedUses) {
+        std::optional<Align> LUAlign = getMinAccessAlign(LU);
+        std::optional<Align> ThatAlign = getMinAccessAlign(*LUThatHas);
+        if (LUAlign && ThatAlign && *LUAlign > *ThatAlign)
+          continue;
+      }
 
       if (!reconcileNewOffset(*LUThatHas, F.BaseOffset, /*HasBaseReg=*/ false,
                               LU.Kind, LU.AccessTy))
