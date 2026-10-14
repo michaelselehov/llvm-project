@@ -55,6 +55,7 @@ define amdgpu_kernel void @triangular_loop_scc_liveness(i64 %n) {
 ; GFX1100:       ; %bb.0: ; %entry
 ; GFX1100-NEXT:    s_load_b64 s[2:3], s[4:5], 0x0
 ; GFX1100-NEXT:    s_mov_b64 s[0:1], 1
+; GFX1100-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX1100-NEXT:    s_branch .LBB0_3
 ; GFX1100-NEXT:    .p2align 6
 ; GFX1100-NEXT:  .LBB0_1: ; in Loop: Header=BB0_3 Depth=1
@@ -68,7 +69,6 @@ define amdgpu_kernel void @triangular_loop_scc_liveness(i64 %n) {
 ; GFX1100-NEXT:  .LBB0_3: ; %outer
 ; GFX1100-NEXT:    ; =>This Loop Header: Depth=1
 ; GFX1100-NEXT:    ; Child Loop BB0_5 Depth 2
-; GFX1100-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX1100-NEXT:    v_cmp_gt_i64_e64 s0, s[0:1], s[2:3]
 ; GFX1100-NEXT:    s_and_b32 vcc_lo, exec_lo, s0
 ; GFX1100-NEXT:    s_mov_b64 s[0:1], 0

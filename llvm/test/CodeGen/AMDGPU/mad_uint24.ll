@@ -426,6 +426,7 @@ define amdgpu_kernel void @extra_and(ptr addrspace(1) %arg, i32 %arg2, i32 %arg3
 ; GCN-NEXT:    s_load_dwordx2 s[0:1], s[4:5], 0xb
 ; GCN-NEXT:    s_mov_b32 s2, 0
 ; GCN-NEXT:    s_mov_b32 s6, 0
+; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:  .LBB4_1: ; %bb4
 ; GCN-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; GCN-NEXT:    s_and_b32 s3, s6, 0xffffff
@@ -433,7 +434,6 @@ define amdgpu_kernel void @extra_and(ptr addrspace(1) %arg, i32 %arg2, i32 %arg3
 ; GCN-NEXT:    s_and_b32 s2, s2, 0xffffff
 ; GCN-NEXT:    s_mul_i32 s3, s3, s2
 ; GCN-NEXT:    s_mul_i32 s6, s6, s2
-; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:    s_add_i32 s2, s0, s3
 ; GCN-NEXT:    s_add_i32 s6, s1, s6
 ; GCN-NEXT:    s_add_i32 s3, s2, s6
@@ -453,6 +453,7 @@ define amdgpu_kernel void @extra_and(ptr addrspace(1) %arg, i32 %arg2, i32 %arg3
 ; GFX8-NEXT:    s_load_dwordx2 s[0:1], s[4:5], 0x2c
 ; GFX8-NEXT:    s_mov_b32 s2, 0
 ; GFX8-NEXT:    s_mov_b32 s6, 0
+; GFX8-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX8-NEXT:  .LBB4_1: ; %bb4
 ; GFX8-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; GFX8-NEXT:    s_and_b32 s3, s6, 0xffffff
@@ -460,7 +461,6 @@ define amdgpu_kernel void @extra_and(ptr addrspace(1) %arg, i32 %arg2, i32 %arg3
 ; GFX8-NEXT:    s_and_b32 s2, s2, 0xffffff
 ; GFX8-NEXT:    s_mul_i32 s3, s3, s2
 ; GFX8-NEXT:    s_mul_i32 s6, s6, s2
-; GFX8-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX8-NEXT:    s_add_i32 s2, s0, s3
 ; GFX8-NEXT:    s_add_i32 s6, s1, s6
 ; GFX8-NEXT:    s_add_i32 s3, s2, s6
@@ -584,6 +584,7 @@ define amdgpu_kernel void @dont_remove_shift(ptr addrspace(1) %arg, i32 %arg2, i
 ; GCN-NEXT:    s_load_dwordx2 s[0:1], s[4:5], 0xb
 ; GCN-NEXT:    s_mov_b32 s2, 0
 ; GCN-NEXT:    s_mov_b32 s6, 0
+; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:  .LBB5_1: ; %bb4
 ; GCN-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; GCN-NEXT:    s_lshr_b32 s3, s6, 8
@@ -591,7 +592,6 @@ define amdgpu_kernel void @dont_remove_shift(ptr addrspace(1) %arg, i32 %arg2, i
 ; GCN-NEXT:    s_lshr_b32 s2, s2, 8
 ; GCN-NEXT:    s_mul_i32 s3, s3, s2
 ; GCN-NEXT:    s_mul_i32 s6, s6, s2
-; GCN-NEXT:    s_waitcnt lgkmcnt(0)
 ; GCN-NEXT:    s_add_i32 s2, s0, s3
 ; GCN-NEXT:    s_add_i32 s6, s1, s6
 ; GCN-NEXT:    s_add_i32 s3, s2, s6
@@ -611,6 +611,7 @@ define amdgpu_kernel void @dont_remove_shift(ptr addrspace(1) %arg, i32 %arg2, i
 ; GFX8-NEXT:    s_load_dwordx2 s[0:1], s[4:5], 0x2c
 ; GFX8-NEXT:    s_mov_b32 s2, 0
 ; GFX8-NEXT:    s_mov_b32 s6, 0
+; GFX8-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX8-NEXT:  .LBB5_1: ; %bb4
 ; GFX8-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; GFX8-NEXT:    s_lshr_b32 s3, s6, 8
@@ -618,7 +619,6 @@ define amdgpu_kernel void @dont_remove_shift(ptr addrspace(1) %arg, i32 %arg2, i
 ; GFX8-NEXT:    s_lshr_b32 s2, s2, 8
 ; GFX8-NEXT:    s_mul_i32 s3, s3, s2
 ; GFX8-NEXT:    s_mul_i32 s6, s6, s2
-; GFX8-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX8-NEXT:    s_add_i32 s2, s0, s3
 ; GFX8-NEXT:    s_add_i32 s6, s1, s6
 ; GFX8-NEXT:    s_add_i32 s3, s2, s6

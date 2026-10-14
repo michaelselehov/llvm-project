@@ -160,9 +160,9 @@ define void @main(i1 %arg) #0 {
 ; CHECK-NEXT:    v_readlane_b32 s57, v7, 37
 ; CHECK-NEXT:    v_readlane_b32 s58, v7, 38
 ; CHECK-NEXT:    v_readlane_b32 s59, v7, 39
+; CHECK-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-NEXT:  .LBB0_2: ; %bb50
 ; CHECK-NEXT:    ; =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    s_waitcnt lgkmcnt(0)
 ; CHECK-NEXT:    image_sample_lz v4, v[1:2], s[16:23], s[28:31] dmask:0x1
 ; CHECK-NEXT:    s_nop 0
 ; CHECK-NEXT:    image_sample_lz v1, v[1:2], s[44:51], s[68:71] dmask:0x1

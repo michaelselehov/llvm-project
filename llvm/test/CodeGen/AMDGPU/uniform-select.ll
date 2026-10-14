@@ -14,9 +14,9 @@ define amdgpu_kernel void @test_insert_extract(i32 %p, i32 %q) {
 ; GFX90A-NEXT:    s_mov_b32 s4, 0
 ; GFX90A-NEXT:    s_mov_b32 s5, 0
 ; GFX90A-NEXT:    s_mov_b32 s6, 0
+; GFX90A-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX90A-NEXT:  .LBB0_1: ; %for.body
 ; GFX90A-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX90A-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX90A-NEXT:    s_cmp_eq_u32 s1, 1
 ; GFX90A-NEXT:    s_cselect_b64 s[8:9], -1, 0
 ; GFX90A-NEXT:    s_and_b64 s[8:9], s[8:9], exec
@@ -62,9 +62,9 @@ define amdgpu_kernel void @test_insert_extract(i32 %p, i32 %q) {
 ; GFX942-NEXT:    s_mov_b32 s4, 0
 ; GFX942-NEXT:    s_mov_b32 s5, 0
 ; GFX942-NEXT:    s_mov_b32 s6, 0
+; GFX942-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX942-NEXT:  .LBB0_1: ; %for.body
 ; GFX942-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX942-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX942-NEXT:    s_cmp_eq_u32 s1, 1
 ; GFX942-NEXT:    s_cselect_b64 s[8:9], -1, 0
 ; GFX942-NEXT:    s_and_b64 s[8:9], s[8:9], exec
@@ -110,10 +110,10 @@ define amdgpu_kernel void @test_insert_extract(i32 %p, i32 %q) {
 ; GFX1030-NEXT:    s_mov_b32 s5, 0
 ; GFX1030-NEXT:    s_mov_b32 s6, 0
 ; GFX1030-NEXT:    s_mov_b32 vcc_lo, exec_lo
+; GFX1030-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX1030-NEXT:    .p2align 6
 ; GFX1030-NEXT:  .LBB0_1: ; %for.body
 ; GFX1030-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1030-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX1030-NEXT:    s_cmp_eq_u32 s1, 1
 ; GFX1030-NEXT:    s_cselect_b32 s7, -1, 0
 ; GFX1030-NEXT:    s_and_b32 s7, s7, exec_lo
@@ -158,10 +158,10 @@ define amdgpu_kernel void @test_insert_extract(i32 %p, i32 %q) {
 ; GFX1100-NEXT:    s_mov_b32 s5, 0
 ; GFX1100-NEXT:    s_mov_b32 s6, 0
 ; GFX1100-NEXT:    s_mov_b32 vcc_lo, exec_lo
+; GFX1100-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX1100-NEXT:    .p2align 6
 ; GFX1100-NEXT:  .LBB0_1: ; %for.body
 ; GFX1100-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1100-NEXT:    s_waitcnt lgkmcnt(0)
 ; GFX1100-NEXT:    s_cmp_eq_u32 s1, 1
 ; GFX1100-NEXT:    s_cselect_b32 s7, -1, 0
 ; GFX1100-NEXT:    s_delay_alu instid0(SALU_CYCLE_1) | instskip(SKIP_3) | instid1(SALU_CYCLE_1)

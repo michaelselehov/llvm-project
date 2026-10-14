@@ -563,9 +563,9 @@ define amdgpu_kernel void @uniform_loop(ptr addrspace(1) %out, i32 %a) {
 ; SI-LABEL: uniform_loop:
 ; SI:       ; %bb.0: ; %entry
 ; SI-NEXT:    s_load_dword s0, s[4:5], 0xb
+; SI-NEXT:    s_waitcnt lgkmcnt(0)
 ; SI-NEXT:  .LBB10_1: ; %loop
 ; SI-NEXT:    ; =>This Inner Loop Header: Depth=1
-; SI-NEXT:    s_waitcnt lgkmcnt(0)
 ; SI-NEXT:    s_add_i32 s0, s0, -1
 ; SI-NEXT:    s_cmp_lg_u32 s0, 0
 ; SI-NEXT:    s_cbranch_scc1 .LBB10_1
@@ -575,9 +575,9 @@ define amdgpu_kernel void @uniform_loop(ptr addrspace(1) %out, i32 %a) {
 ; VI-LABEL: uniform_loop:
 ; VI:       ; %bb.0: ; %entry
 ; VI-NEXT:    s_load_dword s0, s[4:5], 0x2c
+; VI-NEXT:    s_waitcnt lgkmcnt(0)
 ; VI-NEXT:  .LBB10_1: ; %loop
 ; VI-NEXT:    ; =>This Inner Loop Header: Depth=1
-; VI-NEXT:    s_waitcnt lgkmcnt(0)
 ; VI-NEXT:    s_add_i32 s0, s0, -1
 ; VI-NEXT:    s_cmp_lg_u32 s0, 0
 ; VI-NEXT:    s_cbranch_scc1 .LBB10_1

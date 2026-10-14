@@ -138,6 +138,18 @@ static bool updateVMCntOnly(const MachineInstr &Inst) {
          SIInstrInfo::isFLATGlobal(Inst) || SIInstrInfo::isFLATScratch(Inst);
 }
 
+static bool isSMEMPrefetch(const MachineInstr &MI) {
+  switch (MI.getOpcode()) {
+  case AMDGPU::S_PREFETCH_INST:
+  case AMDGPU::S_PREFETCH_INST_PC_REL:
+  case AMDGPU::S_PREFETCH_DATA:
+  case AMDGPU::S_PREFETCH_DATA_PC_REL:
+    return true;
+  default:
+    return false;
+  }
+}
+
 #ifndef NDEBUG
 static bool isNormalMode(AMDGPU::InstCounterType MaxCounter) {
   return MaxCounter == AMDGPU::NUM_NORMAL_INST_CNTS;
@@ -344,6 +356,7 @@ public:
 struct PreheaderFlushFlags {
   bool FlushVmCnt = false;
   bool FlushDsCnt = false;
+  bool FlushSmemCnt = false;
 };
 
 class SIInsertWaitcnts {
@@ -513,6 +526,10 @@ public:
 
   bool hasPendingVMEM(VMEMID ID, AMDGPU::InstCounterType T) const {
     return getVMemScore(ID, T) > getScoreLB(T);
+  }
+
+  bool hasPendingSGPR(MCRegUnit RU, AMDGPU::InstCounterType T) const {
+    return getSGPRScore(RU, T) > getScoreLB(T);
   }
 
   /// \Return true if we have no score entries for counter \p T.
@@ -2626,6 +2643,10 @@ bool SIInsertWaitcnts::generateWaitcntInstBefore(
   if (FlushFlags.FlushDsCnt && ScoreBrackets.hasPendingEvent(AMDGPU::DS_CNT))
     Wait.set(AMDGPU::DS_CNT, 0);
 
+  if (FlushFlags.FlushSmemCnt &&
+      ScoreBrackets.hasPendingEvent(SmemAccessCounter))
+    Wait.set(SmemAccessCounter, 0);
+
   if (ForceEmitZeroLoadFlag && Wait.get(AMDGPU::LOAD_CNT) != ~0u)
     Wait.set(AMDGPU::LOAD_CNT, 0);
 
@@ -3170,6 +3191,9 @@ bool SIInsertWaitcnts::insertWaitcntInBlock(MachineFunction &MF,
     }
     if (FlushFlags.FlushDsCnt && ScoreBrackets.hasPendingEvent(AMDGPU::DS_CNT))
       Wait.set(AMDGPU::DS_CNT, 0);
+    if (FlushFlags.FlushSmemCnt &&
+        ScoreBrackets.hasPendingEvent(SmemAccessCounter))
+      Wait.set(SmemAccessCounter, 0);
   }
 
   // Combine or remove any redundant waitcnts at the end of the block.
@@ -3285,6 +3309,14 @@ bool SIInsertWaitcnts::mayStoreIncrementingDSCNT(const MachineInstr &MI) const {
 //    read is consumed in the same iteration, it and all prior reads are
 //    "flushed" (FIFO order). No DS writes are allowed in the loop.
 //    TODO: Find a way to extend to multi-block loops.
+// For SMEM (FlushSmemCnt):
+// 6. The loop contains no call, no instruction other than a prefetch that
+//    increments the SMEM counter, and at least one access to an sgpr that is
+//    loaded by SMEM outside of the loop. Every wait for that counter inside the
+//    loop then waits only for loads issued before the loop, and is redundant
+//    after iteration 1. No instruction that accesses such an sgpr may also use
+//    a vgpr that is loaded earlier in the loop or still pending, because it
+//    keeps its wait.
 PreheaderFlushFlags
 SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
                                          const WaitcntBrackets &Brackets) {
@@ -3294,6 +3326,10 @@ SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
   bool UsesVgprVMEMLoadedOutside = false;
   bool UsesVgprDSReadOutside = false;
   bool VMemInvalidated = false;
+  SmallVector<const MachineInstr *> SgprSmemLoadedOutsideUsers;
+  bool SmemInvalidated = false;
+  bool SmemWaitInHeader = false;
+  HWEvents SmemEvents = getWaitEvents(SmemAccessCounter);
   // DS optimization only applies to GFX12+ where DS_CNT is separate.
   // Tracking status for "no DS read in loop" or "pure DS prefetch
   // (use only in next iteration)".
@@ -3312,8 +3348,48 @@ SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
   bool TrackDSFlushPoint = ST.hasExtendedWaitCounts() && IsSingleBlock;
   unsigned LastDSFlushPosition = 0;
 
+  auto UsesSgprSmemLoadedOutside = [&](const MachineInstr &MI) {
+    for (const MachineOperand &Op : MI.operands()) {
+      if (!Op.isReg() || Op.isDebug() || !Op.getReg().isPhysical() ||
+          !TRI.isSGPRReg(MRI, Op.getReg()))
+        continue;
+      for (MCRegUnit RU : TRI.regunits(Op.getReg().asMCReg()))
+        if (Brackets.hasPendingSGPR(RU, SmemAccessCounter))
+          return true;
+    }
+    return false;
+  };
+  auto UsesVgprLoadedInLoop = [&](const MachineInstr &MI) {
+    for (const MachineOperand &Op : MI.all_uses()) {
+      if (Op.isDebug() || !TRI.isVectorRegister(MRI, Op.getReg()))
+        continue;
+      for (MCRegUnit RU : TRI.regunits(Op.getReg().asMCReg()))
+        if (VgprDefVMEM.contains(RU) || VgprDefDS.contains(RU))
+          return true;
+    }
+    return false;
+  };
+
   for (MachineBasicBlock *MBB : ML->blocks()) {
     for (MachineInstr &MI : *MBB) {
+      if (!SmemInvalidated) {
+        // A prefetch writes no register, so no instruction waits for it.
+        if (MI.isCall() ||
+            (!isSMEMPrefetch(MI) &&
+             (AMDGPU::getEventsFor(MI, ST, IsExpertMode, TgSplit) & SmemEvents)
+                 .any())) {
+          SmemInvalidated = true;
+        } else if (!SmemWaitInHeader && UsesSgprSmemLoadedOutside(MI)) {
+          // A vgpr loaded earlier in the iteration keeps the wait in the loop.
+          if (UsesVgprLoadedInLoop(MI)) {
+            SmemInvalidated = true;
+          } else {
+            SgprSmemLoadedOutsideUsers.push_back(&MI);
+            // The wait before a user in the header covers all later users.
+            SmemWaitInHeader = MBB == ML->getHeader();
+          }
+        }
+      }
       if (isVMEMOrFlatVMEM(MI)) {
         HasVMemLoad |= MI.mayLoad();
         HasVMemStore |= MI.mayStore();
@@ -3323,7 +3399,7 @@ SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
       if (mayStoreIncrementingDSCNT(MI)) {
         // Early exit if none of the optimizations are feasible.
         // Otherwise, set tracking status appropriately and continue.
-        if (VMemInvalidated)
+        if (VMemInvalidated && SmemInvalidated)
           return Flags;
         TrackSimpleDSOpt = false;
         TrackDSFlushPoint = false;
@@ -3360,7 +3436,8 @@ SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
             TrackSimpleDSOpt = false;
 
           // Early exit if all optimizations are invalidated
-          if (VMemInvalidated && !TrackSimpleDSOpt && !TrackDSFlushPoint)
+          if (VMemInvalidated && SmemInvalidated && !TrackSimpleDSOpt &&
+              !TrackDSFlushPoint)
             return Flags;
 
           // Check for flush points (DS read used in same iteration)
@@ -3394,7 +3471,8 @@ SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
           }
         }
         // Early exit if all optimizations are invalidated
-        if (VMemInvalidated && !TrackSimpleDSOpt && !TrackDSFlushPoint)
+        if (VMemInvalidated && SmemInvalidated && !TrackSimpleDSOpt &&
+            !TrackDSFlushPoint)
           return Flags;
       }
 
@@ -3443,6 +3521,29 @@ SIInsertWaitcnts::getPreheaderFlushFlags(MachineLoop *ML,
 
   if (SimpleDSOpt || DSFlushPointPrefetch)
     Flags.FlushDsCnt = true;
+
+  // SMEM flush decision: a user that also waits for a vgpr keeps its wait in
+  // the loop, and the flush in the preheader would only add a wait.
+  auto WaitsForVgpr = [&](const MachineInstr *MI) {
+    for (const MachineOperand &Op : MI->all_uses()) {
+      if (Op.isDebug() || !TRI.isVectorRegister(MRI, Op.getReg()))
+        continue;
+      for (MCRegUnit RU : TRI.regunits(Op.getReg().asMCReg())) {
+        VMEMID ID = toVMEMID(RU);
+        if (!Flags.FlushVmCnt &&
+            (Brackets.hasPendingVMEM(ID, AMDGPU::LOAD_CNT) ||
+             Brackets.hasPendingVMEM(ID, AMDGPU::SAMPLE_CNT) ||
+             Brackets.hasPendingVMEM(ID, AMDGPU::BVH_CNT)))
+          return true;
+        if (!Flags.FlushDsCnt && Brackets.hasPendingVMEM(ID, AMDGPU::DS_CNT))
+          return true;
+      }
+    }
+    return false;
+  };
+  if (!SmemInvalidated && !SgprSmemLoadedOutsideUsers.empty() &&
+      none_of(SgprSmemLoadedOutsideUsers, WaitsForVgpr))
+    Flags.FlushSmemCnt = true;
 
   return Flags;
 }

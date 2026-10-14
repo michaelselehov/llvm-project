@@ -89,9 +89,9 @@ define amdgpu_kernel void @mask_in_loop_body(ptr addrspace(1) %out, ptr addrspac
 ; GFX1250-NEXT:    v_and_b32_e32 v0, 0x3ff, v0
 ; GFX1250-NEXT:    s_delay_alu instid0(VALU_DEP_1)
 ; GFX1250-NEXT:    v_dual_mov_b32 v1, 0 :: v_dual_mov_b32 v2, v0
+; GFX1250-NEXT:    s_wait_kmcnt 0x0
 ; GFX1250-NEXT:  .LBB1_1: ; %loop
 ; GFX1250-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1250-NEXT:    s_wait_kmcnt 0x0
 ; GFX1250-NEXT:    global_load_b32 v3, v2, s[2:3] scale_offset
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
 ; GFX1250-NEXT:    v_add_nc_u32_e32 v2, 1, v2
@@ -115,11 +115,11 @@ define amdgpu_kernel void @mask_in_loop_body(ptr addrspace(1) %out, ptr addrspac
 ; GFX1200-NEXT:    v_dual_mov_b32 v3, 0 :: v_dual_and_b32 v2, 0x3ff, v0
 ; GFX1200-NEXT:    s_delay_alu instid0(VALU_DEP_1)
 ; GFX1200-NEXT:    v_mov_b32_e32 v0, v2
+; GFX1200-NEXT:    s_wait_kmcnt 0x0
 ; GFX1200-NEXT:  .LBB1_1: ; %loop
 ; GFX1200-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1200-NEXT:    s_delay_alu instid0(VALU_DEP_1) | instskip(SKIP_2) | instid1(SALU_CYCLE_1)
+; GFX1200-NEXT:    s_delay_alu instid0(VALU_DEP_1) | instskip(SKIP_1) | instid1(SALU_CYCLE_1)
 ; GFX1200-NEXT:    v_ashrrev_i32_e32 v1, 31, v0
-; GFX1200-NEXT:    s_wait_kmcnt 0x0
 ; GFX1200-NEXT:    s_add_co_i32 s4, s4, -1
 ; GFX1200-NEXT:    s_cmp_lg_u32 s4, 0
 ; GFX1200-NEXT:    s_delay_alu instid0(VALU_DEP_1) | instskip(SKIP_1) | instid1(VALU_DEP_2)

@@ -431,13 +431,13 @@ define amdgpu_kernel void @test_pipelined_loop_with_global(ptr addrspace(1) %foo
 ; GISEL-NEXT:    v_readfirstlane_b32 s15, v3
 ; GISEL-NEXT:    s_mov_b32 s9, s8
 ; GISEL-NEXT:    s_mov_b32 s19, s15
+; GISEL-NEXT:    s_wait_kmcnt 0x0
 ; GISEL-NEXT:  .LBB2_1: ; %loop_body
 ; GISEL-NEXT:    ; =>This Inner Loop Header: Depth=1
 ; GISEL-NEXT:    s_add_co_u32 s17, s14, 8
 ; GISEL-NEXT:    global_load_b32 v2, v0, s[6:7]
 ; GISEL-NEXT:    v_dual_mov_b32 v1, s17 :: v_dual_mov_b32 v4, s14
 ; GISEL-NEXT:    s_mov_b32 s18, s9
-; GISEL-NEXT:    s_wait_kmcnt 0x0
 ; GISEL-NEXT:    s_add_co_i32 s9, s13, s16
 ; GISEL-NEXT:    s_add_co_i32 s12, s12, 1
 ; GISEL-NEXT:    s_clause 0x1
