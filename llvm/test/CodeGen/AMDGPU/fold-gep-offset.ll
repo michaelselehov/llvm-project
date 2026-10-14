@@ -720,21 +720,21 @@ define void @flat_offset_inbounds_very_wide(ptr %p, ptr %pout, i32 %i) {
 ; GFX12-SDAG-NEXT:    s_wait_alu depctr_va_vcc(0)
 ; GFX12-SDAG-NEXT:    s_delay_alu instid0(VALU_DEP_2) | instskip(NEXT) | instid1(VALU_DEP_2)
 ; GFX12-SDAG-NEXT:    v_add_co_ci_u32_e64 v1, null, v1, v5, vcc_lo
-; GFX12-SDAG-NEXT:    v_add_co_u32 v36, vcc_lo, v0, 28
+; GFX12-SDAG-NEXT:    v_add_co_u32 v0, vcc_lo, v0, 28
 ; GFX12-SDAG-NEXT:    s_wait_alu depctr_va_vcc(0)
 ; GFX12-SDAG-NEXT:    s_delay_alu instid0(VALU_DEP_2)
-; GFX12-SDAG-NEXT:    v_add_co_ci_u32_e64 v37, null, 0, v1, vcc_lo
+; GFX12-SDAG-NEXT:    v_add_co_ci_u32_e64 v1, null, 0, v1, vcc_lo
 ; GFX12-SDAG-NEXT:    s_clause 0x7
-; GFX12-SDAG-NEXT:    flat_load_b128 v[4:7], v[36:37] offset:80
-; GFX12-SDAG-NEXT:    flat_load_b128 v[8:11], v[36:37] offset:96
-; GFX12-SDAG-NEXT:    flat_load_b128 v[12:15], v[36:37] offset:64
-; GFX12-SDAG-NEXT:    flat_load_b128 v[16:19], v[36:37] offset:32
-; GFX12-SDAG-NEXT:    flat_load_b128 v[20:23], v[36:37] offset:16
-; GFX12-SDAG-NEXT:    flat_load_b128 v[24:27], v[36:37]
-; GFX12-SDAG-NEXT:    flat_load_b128 v[28:31], v[0:1] offset:12
-; GFX12-SDAG-NEXT:    flat_load_b128 v[32:35], v[36:37] offset:112
+; GFX12-SDAG-NEXT:    flat_load_b128 v[4:7], v[0:1] offset:80
+; GFX12-SDAG-NEXT:    flat_load_b128 v[8:11], v[0:1] offset:96
+; GFX12-SDAG-NEXT:    flat_load_b128 v[12:15], v[0:1] offset:64
+; GFX12-SDAG-NEXT:    flat_load_b128 v[16:19], v[0:1] offset:32
+; GFX12-SDAG-NEXT:    flat_load_b128 v[20:23], v[0:1] offset:16
+; GFX12-SDAG-NEXT:    flat_load_b128 v[24:27], v[0:1]
+; GFX12-SDAG-NEXT:    flat_load_b128 v[28:31], v[0:1] offset:-16
+; GFX12-SDAG-NEXT:    flat_load_b128 v[32:35], v[0:1] offset:112
 ; GFX12-SDAG-NEXT:    s_wait_loadcnt_dscnt 0x0
-; GFX12-SDAG-NEXT:    flat_load_b128 v[35:38], v[36:37] offset:48
+; GFX12-SDAG-NEXT:    flat_load_b128 v[35:38], v[0:1] offset:48
 ; GFX12-SDAG-NEXT:    v_add_co_u32 v0, vcc_lo, v2, 48
 ; GFX12-SDAG-NEXT:    s_wait_alu depctr_va_vcc(0)
 ; GFX12-SDAG-NEXT:    v_add_co_ci_u32_e64 v1, null, 0, v3, vcc_lo

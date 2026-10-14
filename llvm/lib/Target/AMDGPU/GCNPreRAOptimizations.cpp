@@ -22,6 +22,20 @@
 /// although the same shall be possible with other register classes and
 /// instructions if necessary.
 ///
+/// This pass also rewrites a FLAT access to %0 + K to use %1 + (K - C), if
+/// %1 = %0 + C is computed earlier in the block and stays live after the
+/// access:
+///
+///   %1:vreg_64 = V_LSHL_ADD_U64_e64 %0, 0, -4
+///   GLOBAL_STORE_DWORD %0, %2, -8, 0
+/// =>
+///   %1:vreg_64 = V_LSHL_ADD_U64_e64 %0, 0, -4
+///   GLOBAL_STORE_DWORD %1, %2, -4, 0
+///
+/// It does so only if the access is the last use of %0, so that %0 and %1 no
+/// longer overlap. This typically removes the copy of a loop
+/// pointer that is incremented before its last access in the iteration.
+///
 /// This pass also adds register allocation hints to COPY.
 /// The hints will be post-processed by SIRegisterInfo::getRegAllocationHints.
 /// When using True16, we often see COPY moving a 16-bit value between a VGPR_32
@@ -57,6 +71,7 @@ namespace {
 
 class GCNPreRAOptimizationsImpl {
 private:
+  const GCNSubtarget *ST;
   const SIInstrInfo *TII;
   const SIRegisterInfo *TRI;
   MachineRegisterInfo *MRI;
@@ -66,6 +81,9 @@ private:
   bool processReg(Register Reg);
   void hintTrue16Copy(const MachineInstr &MI);
   bool optimizeBVHStack(MachineInstr &MI);
+  std::optional<std::pair<Register, int64_t>>
+  findIncrementedBase(MachineInstr &MI, Register Base) const;
+  bool reuseIncrementedBase(MachineInstr &MI);
 
 public:
   GCNPreRAOptimizationsImpl(LiveIntervals *LS) : LIS(LS) {}
@@ -306,8 +324,175 @@ bool GCNPreRAOptimizationsImpl::optimizeBVHStack(MachineInstr &MI) {
   return true;
 }
 
+// Find the closest instruction before \p MI in the same block that reads
+// \p Base. If it computes Sum = Base + C as a 64-bit add with an immediate C,
+// return Sum and C. No instruction between the add and \p MI may write
+// \p Base.
+std::optional<std::pair<Register, int64_t>>
+GCNPreRAOptimizationsImpl::findIncrementedBase(MachineInstr &MI,
+                                               Register Base) const {
+  auto IsReg = [&](const MachineOperand *Op, unsigned SubReg) {
+    return Op && Op->isReg() && Op->getReg() == Base &&
+           Op->getSubReg() == SubReg;
+  };
+  // Match Src0 + Src1 == Base.SubReg + Imm in either operand order.
+  auto GetAddImm = [&](const MachineInstr &Def,
+                       unsigned SubReg) -> std::optional<int64_t> {
+    const MachineOperand *Src0 =
+        TII->getNamedOperand(Def, AMDGPU::OpName::src0);
+    const MachineOperand *Src1 =
+        TII->getNamedOperand(Def, AMDGPU::OpName::src1);
+    if (!Src0 || !Src1)
+      return std::nullopt;
+    if (IsReg(Src0, SubReg))
+      return TII->getImmOrMaterializedImm(*MRI, *Src1);
+    if (IsReg(Src1, SubReg))
+      return TII->getImmOrMaterializedImm(*MRI, *Src0);
+    return std::nullopt;
+  };
+
+  MachineBasicBlock::iterator Begin = MI.getParent()->begin();
+  for (MachineBasicBlock::iterator I = MI.getIterator(); I != Begin;) {
+    MachineInstr &Def = *--I;
+    if (Def.isDebugInstr())
+      continue;
+    if (Def.modifiesRegister(Base, TRI))
+      return std::nullopt;
+    if (!Def.readsRegister(Base, TRI))
+      continue;
+    const MachineOperand &Dst = Def.getOperand(0);
+    if (!Dst.isReg() || !Dst.isDef() || !Dst.getReg().isVirtual())
+      return std::nullopt;
+    Register Sum = Dst.getReg();
+    switch (Def.getOpcode()) {
+    case AMDGPU::V_LSHL_ADD_U64_e64: {
+      const MachineOperand *Shift =
+          TII->getNamedOperand(Def, AMDGPU::OpName::src1);
+      const MachineOperand *Addend =
+          TII->getNamedOperand(Def, AMDGPU::OpName::src2);
+      if (Dst.getSubReg() ||
+          !IsReg(TII->getNamedOperand(Def, AMDGPU::OpName::src0), 0) ||
+          !Shift || !Shift->isImm() || Shift->getImm() != 0 || !Addend ||
+          !Addend->isImm())
+        return std::nullopt;
+      return std::pair(Sum, Addend->getImm());
+    }
+    case AMDGPU::V_ADD_U64_e32:
+    case AMDGPU::V_ADD_U64_e64: {
+      std::optional<int64_t> Imm = GetAddImm(Def, 0);
+      if (Dst.getSubReg() || !Imm)
+        return std::nullopt;
+      return std::pair(Sum, *Imm);
+    }
+    case AMDGPU::V_ADDC_U32_e32:
+    case AMDGPU::V_ADDC_U32_e64: {
+      std::optional<int64_t> Hi = GetAddImm(Def, AMDGPU::sub1);
+      if (Dst.getSubReg() != AMDGPU::sub1 || !Hi)
+        return std::nullopt;
+      // The low half must come just before and produce the carry.
+      MachineBasicBlock::iterator J = I;
+      while (J != Begin && std::prev(J)->isDebugInstr())
+        --J;
+      if (J == Begin)
+        return std::nullopt;
+      MachineInstr &LoDef = *std::prev(J);
+      if (LoDef.getOpcode() != (Def.getOpcode() == AMDGPU::V_ADDC_U32_e32
+                                    ? AMDGPU::V_ADD_CO_U32_e32
+                                    : AMDGPU::V_ADD_CO_U32_e64))
+        return std::nullopt;
+      const MachineOperand &LoDst = LoDef.getOperand(0);
+      std::optional<int64_t> Lo = GetAddImm(LoDef, AMDGPU::sub0);
+      if (!LoDst.isReg() || LoDst.getReg() != Sum ||
+          LoDst.getSubReg() != AMDGPU::sub0 || !Lo)
+        return std::nullopt;
+      if (Def.getOpcode() == AMDGPU::V_ADDC_U32_e64) {
+        const MachineOperand *CarryIn =
+            TII->getNamedOperand(Def, AMDGPU::OpName::src2);
+        const MachineOperand *CarryOut =
+            TII->getNamedOperand(LoDef, AMDGPU::OpName::sdst);
+        if (!CarryIn || !CarryOut || !CarryIn->isReg() || !CarryOut->isReg() ||
+            CarryIn->getReg() != CarryOut->getReg())
+          return std::nullopt;
+      }
+      return std::pair(
+          Sum, static_cast<int64_t>((static_cast<uint64_t>(*Lo) & 0xffffffff) |
+                                    (static_cast<uint64_t>(*Hi) << 32)));
+    }
+    default:
+      return std::nullopt;
+    }
+  }
+  return std::nullopt;
+}
+
+bool GCNPreRAOptimizationsImpl::reuseIncrementedBase(MachineInstr &MI) {
+  if (!SIInstrInfo::isFLAT(MI) || SIInstrInfo::isFLATScratch(MI) ||
+      TII->usesASYNC_CNT(MI) || TII->getNamedOperand(MI, AMDGPU::OpName::saddr))
+    return false;
+  MachineOperand *Addr = TII->getNamedOperand(MI, AMDGPU::OpName::vaddr);
+  MachineOperand *OffsetOp = TII->getNamedOperand(MI, AMDGPU::OpName::offset);
+  if (!Addr || !OffsetOp || Addr->getSubReg() || !Addr->getReg().isVirtual())
+    return false;
+  Register Base = Addr->getReg();
+
+  // MI must be the last use of the base, otherwise the base stays live anyway.
+  SlotIndex Idx = LIS->getInstructionIndex(MI).getRegSlot();
+  if (!LIS->getInterval(Base).Query(Idx).isKill())
+    return false;
+
+  std::optional<std::pair<Register, int64_t>> Found =
+      findIncrementedBase(MI, Base);
+  if (!Found)
+    return false;
+  auto [Sum, Inc] = *Found;
+  int64_t NewOffset = OffsetOp->getImm() - Inc;
+
+  bool IsGlobal = SIInstrInfo::isFLATGlobal(MI);
+  if (!TII->isLegalFLATOffset(NewOffset,
+                              IsGlobal ? AMDGPUAS::GLOBAL_ADDRESS
+                                       : AMDGPUAS::FLAT_ADDRESS,
+                              IsGlobal ? AMDGPU::FlatAddrSpace::FlatGlobal
+                                       : AMDGPU::FlatAddrSpace::FLAT))
+    return false;
+
+  // Coalescing of 2 and 4 byte accesses needs every address component to be
+  // aligned. Do not change the alignment of the base unless the offset
+  // becomes 0, in which case the base is the full address.
+  if (NewOffset != 0 && MI.hasOneMemOperand() && ST->hasGFX90AInsts()) {
+    const MachineMemOperand &MMO = **MI.memoperands_begin();
+    LocationSize Size = MMO.getSize();
+    if (!MMO.isAtomic() && Size.hasValue() && !Size.isScalable()) {
+      int64_t Bytes = Size.getValue().getFixedValue();
+      if ((Bytes == 2 || Bytes == 4) && Inc % Bytes != 0)
+        return false;
+    }
+  }
+
+  // Reading the sum at MI must not extend its live range.
+  const LiveInterval &SumLI = LIS->getInterval(Sum);
+  if (!SumLI.liveAt(Idx) ||
+      any_of(SumLI.subranges(),
+             [&](const LiveInterval::SubRange &SR) { return !SR.liveAt(Idx); }))
+    return false;
+
+  const TargetRegisterClass *RC =
+      TII->getRegClass(MI.getDesc(), Addr->getOperandNo());
+  if (RC && !MRI->constrainRegClass(Sum, RC))
+    return false;
+
+  LLVM_DEBUG(dbgs() << "Reuse incremented base " << printReg(Sum, TRI) << " in "
+                    << MI);
+  Addr->setReg(Sum);
+  Addr->setIsKill(false);
+  OffsetOp->setImm(NewOffset);
+  LIS->removeInterval(Base);
+  LIS->createAndComputeVirtRegInterval(Base);
+  return true;
+}
+
 bool GCNPreRAOptimizationsImpl::run(MachineFunction &MF) {
   const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
+  this->ST = &ST;
   TII = ST.getInstrInfo();
   MRI = &MF.getRegInfo();
   TRI = ST.getRegisterInfo();
@@ -336,12 +521,17 @@ bool GCNPreRAOptimizationsImpl::run(MachineFunction &MF) {
 
   const bool HasBVHStack = ST.hasBVHDualAndBVH8Insts();
   const bool HasRealTrue16 = ST.useRealTrue16Insts();
+  const bool HasFlatOffsets = ST.hasFlatInstOffsets();
 
-  if (!HasRealTrue16 && !HasBVHStack)
+  if (!HasRealTrue16 && !HasBVHStack && !HasFlatOffsets)
     return Changed;
 
   for (MachineBasicBlock &MBB : MF) {
     for (MachineInstr &MI : MBB) {
+      if (HasFlatOffsets && reuseIncrementedBase(MI)) {
+        Changed = true;
+        continue;
+      }
       // Add RA hints to improve True16 COPY elimination.
       if (HasRealTrue16 && MI.getOpcode() == AMDGPU::COPY) {
         hintTrue16Copy(MI);

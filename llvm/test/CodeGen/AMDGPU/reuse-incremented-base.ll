@@ -5,9 +5,8 @@
 ; RUN: llc -mtriple=amdgpu12.50 -disable-lsr < %s | FileCheck -check-prefix=GFX1250 %s
 
 ; The loops decrement the pointers before the accesses. The machine scheduler
-; places the decrement of %dp before the store. The store still uses the old
-; pointer, so the old pointer needs a copy.
-; FIXME: The store can use the new pointer, and the copy goes away.
+; places the decrement of %dp before the store, and the store then uses the
+; new pointer instead of the old one. Otherwise the old pointer needs a copy.
 ; LSR is disabled because it rewrites these loops.
 
 define void @copy_bwd(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
@@ -18,19 +17,17 @@ define void @copy_bwd(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX1030-NEXT:    .p2align 6
 ; GFX1030-NEXT:  .LBB0_1: ; %loop
 ; GFX1030-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1030-NEXT:    global_load_ubyte v8, v[2:3], off offset:-1
+; GFX1030-NEXT:    global_load_ubyte v6, v[2:3], off offset:-1
 ; GFX1030-NEXT:    v_add_co_u32 v4, vcc_lo, v4, -1
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v5, null, -1, v5, vcc_lo
-; GFX1030-NEXT:    v_mov_b32_e32 v6, v0
-; GFX1030-NEXT:    v_mov_b32_e32 v7, v1
 ; GFX1030-NEXT:    v_add_co_u32 v2, vcc_lo, v2, -1
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v3, null, -1, v3, vcc_lo
 ; GFX1030-NEXT:    v_cmp_eq_u64_e32 vcc_lo, 0, v[4:5]
-; GFX1030-NEXT:    v_add_co_u32 v0, s4, v6, -1
-; GFX1030-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v7, s4
+; GFX1030-NEXT:    v_add_co_u32 v0, s4, v0, -1
+; GFX1030-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v1, s4
 ; GFX1030-NEXT:    s_or_b32 s5, vcc_lo, s5
 ; GFX1030-NEXT:    s_waitcnt vmcnt(0)
-; GFX1030-NEXT:    global_store_byte v[6:7], v8, off offset:-1
+; GFX1030-NEXT:    global_store_byte v[0:1], v6, off
 ; GFX1030-NEXT:    s_andn2_b32 exec_lo, exec_lo, s5
 ; GFX1030-NEXT:    s_cbranch_execnz .LBB0_1
 ; GFX1030-NEXT:  ; %bb.2: ; %exit
@@ -43,18 +40,17 @@ define void @copy_bwd(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX90A-NEXT:    s_mov_b64 s[4:5], 0
 ; GFX90A-NEXT:  .LBB0_1: ; %loop
 ; GFX90A-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX90A-NEXT:    global_load_ubyte v8, v[2:3], off offset:-1
+; GFX90A-NEXT:    global_load_ubyte v6, v[2:3], off offset:-1
 ; GFX90A-NEXT:    v_add_co_u32_e32 v2, vcc, -1, v2
 ; GFX90A-NEXT:    v_addc_co_u32_e32 v3, vcc, -1, v3, vcc
-; GFX90A-NEXT:    v_add_co_u32_e32 v6, vcc, -1, v0
-; GFX90A-NEXT:    v_addc_co_u32_e32 v7, vcc, -1, v1, vcc
+; GFX90A-NEXT:    v_add_co_u32_e32 v0, vcc, -1, v0
+; GFX90A-NEXT:    v_addc_co_u32_e32 v1, vcc, -1, v1, vcc
 ; GFX90A-NEXT:    v_add_co_u32_e32 v4, vcc, -1, v4
 ; GFX90A-NEXT:    v_addc_co_u32_e32 v5, vcc, -1, v5, vcc
 ; GFX90A-NEXT:    v_cmp_eq_u64_e32 vcc, 0, v[4:5]
 ; GFX90A-NEXT:    s_or_b64 s[4:5], vcc, s[4:5]
 ; GFX90A-NEXT:    s_waitcnt vmcnt(0)
-; GFX90A-NEXT:    global_store_byte v[0:1], v8, off offset:-1
-; GFX90A-NEXT:    v_pk_mov_b32 v[0:1], v[6:7], v[6:7] op_sel:[0,1]
+; GFX90A-NEXT:    global_store_byte v[0:1], v6, off
 ; GFX90A-NEXT:    s_andn2_b64 exec, exec, s[4:5]
 ; GFX90A-NEXT:    s_cbranch_execnz .LBB0_1
 ; GFX90A-NEXT:  ; %bb.2: ; %exit
@@ -68,15 +64,14 @@ define void @copy_bwd(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX942-NEXT:    s_mov_b64 s[0:1], 0
 ; GFX942-NEXT:  .LBB0_1: ; %loop
 ; GFX942-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX942-NEXT:    global_load_ubyte v8, v[2:3], off offset:-1
+; GFX942-NEXT:    global_load_ubyte v6, v[2:3], off offset:-1
 ; GFX942-NEXT:    v_lshl_add_u64 v[4:5], v[4:5], 0, -1
-; GFX942-NEXT:    v_lshl_add_u64 v[6:7], v[0:1], 0, -1
 ; GFX942-NEXT:    v_cmp_eq_u64_e32 vcc, 0, v[4:5]
 ; GFX942-NEXT:    v_lshl_add_u64 v[2:3], v[2:3], 0, -1
+; GFX942-NEXT:    v_lshl_add_u64 v[0:1], v[0:1], 0, -1
 ; GFX942-NEXT:    s_or_b64 s[0:1], vcc, s[0:1]
 ; GFX942-NEXT:    s_waitcnt vmcnt(0)
-; GFX942-NEXT:    global_store_byte v[0:1], v8, off offset:-1
-; GFX942-NEXT:    v_mov_b64_e32 v[0:1], v[6:7]
+; GFX942-NEXT:    global_store_byte v[0:1], v6, off
 ; GFX942-NEXT:    s_andn2_b64 exec, exec, s[0:1]
 ; GFX942-NEXT:    s_cbranch_execnz .LBB0_1
 ; GFX942-NEXT:  ; %bb.2: ; %exit
@@ -91,18 +86,17 @@ define void @copy_bwd(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX1250-NEXT:    s_mov_b32 s0, 0
 ; GFX1250-NEXT:  .LBB0_1: ; %loop
 ; GFX1250-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1250-NEXT:    global_load_u8 v8, v[2:3], off offset:-1
+; GFX1250-NEXT:    global_load_u8 v6, v[2:3], off offset:-1
 ; GFX1250-NEXT:    v_add_nc_u64_e32 v[4:5], -1, v[4:5]
-; GFX1250-NEXT:    v_add_nc_u64_e32 v[6:7], -1, v[0:1]
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
 ; GFX1250-NEXT:    v_add_nc_u64_e32 v[2:3], -1, v[2:3]
+; GFX1250-NEXT:    v_add_nc_u64_e32 v[0:1], -1, v[0:1]
 ; GFX1250-NEXT:    s_delay_alu instid0(VALU_DEP_3)
 ; GFX1250-NEXT:    v_cmp_eq_u64_e32 vcc_lo, 0, v[4:5]
 ; GFX1250-NEXT:    s_or_b32 s0, vcc_lo, s0
 ; GFX1250-NEXT:    s_wait_loadcnt 0x0
-; GFX1250-NEXT:    global_store_b8 v[0:1], v8, off offset:-1
+; GFX1250-NEXT:    global_store_b8 v[0:1], v6, off
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
-; GFX1250-NEXT:    v_mov_b64_e32 v[0:1], v[6:7]
 ; GFX1250-NEXT:    s_and_not1_b32 exec_lo, exec_lo, s0
 ; GFX1250-NEXT:    s_cbranch_execnz .LBB0_1
 ; GFX1250-NEXT:  ; %bb.2: ; %exit
@@ -127,9 +121,8 @@ exit:
   ret void
 }
 
-; The store offset differs from the decrement.
-; FIXME: The store can use the new pointer with the difference of the two as
-; offset.
+; The store offset differs from the decrement. The store uses the new pointer
+; with the difference of the two as offset.
 define void @k_ne_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n, i64 %step) {
 ; GFX1030-LABEL: k_ne_c:
 ; GFX1030:       ; %bb.0: ; %entry
@@ -138,19 +131,17 @@ define void @k_ne_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n, i64 %step)
 ; GFX1030-NEXT:    .p2align 6
 ; GFX1030-NEXT:  .LBB1_1: ; %loop
 ; GFX1030-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1030-NEXT:    global_load_dword v8, v[2:3], off offset:-4
+; GFX1030-NEXT:    global_load_dword v6, v[2:3], off offset:-4
 ; GFX1030-NEXT:    v_add_co_u32 v4, vcc_lo, v4, -1
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v5, null, -1, v5, vcc_lo
-; GFX1030-NEXT:    v_mov_b32_e32 v6, v0
-; GFX1030-NEXT:    v_mov_b32_e32 v7, v1
 ; GFX1030-NEXT:    v_add_co_u32 v2, vcc_lo, v2, -4
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v3, null, -1, v3, vcc_lo
 ; GFX1030-NEXT:    v_cmp_eq_u64_e32 vcc_lo, 0, v[4:5]
-; GFX1030-NEXT:    v_add_co_u32 v0, s4, v6, -4
-; GFX1030-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v7, s4
+; GFX1030-NEXT:    v_add_co_u32 v0, s4, v0, -4
+; GFX1030-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v1, s4
 ; GFX1030-NEXT:    s_or_b32 s5, vcc_lo, s5
 ; GFX1030-NEXT:    s_waitcnt vmcnt(0)
-; GFX1030-NEXT:    global_store_dword v[6:7], v8, off offset:-8
+; GFX1030-NEXT:    global_store_dword v[0:1], v6, off offset:-4
 ; GFX1030-NEXT:    s_andn2_b32 exec_lo, exec_lo, s5
 ; GFX1030-NEXT:    s_cbranch_execnz .LBB1_1
 ; GFX1030-NEXT:  ; %bb.2: ; %exit
@@ -163,18 +154,17 @@ define void @k_ne_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n, i64 %step)
 ; GFX90A-NEXT:    s_mov_b64 s[4:5], 0
 ; GFX90A-NEXT:  .LBB1_1: ; %loop
 ; GFX90A-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX90A-NEXT:    global_load_dword v8, v[2:3], off offset:-4
+; GFX90A-NEXT:    global_load_dword v6, v[2:3], off offset:-4
 ; GFX90A-NEXT:    v_add_co_u32_e32 v2, vcc, -4, v2
 ; GFX90A-NEXT:    v_addc_co_u32_e32 v3, vcc, -1, v3, vcc
-; GFX90A-NEXT:    v_add_co_u32_e32 v6, vcc, -4, v0
-; GFX90A-NEXT:    v_addc_co_u32_e32 v7, vcc, -1, v1, vcc
+; GFX90A-NEXT:    v_add_co_u32_e32 v0, vcc, -4, v0
+; GFX90A-NEXT:    v_addc_co_u32_e32 v1, vcc, -1, v1, vcc
 ; GFX90A-NEXT:    v_add_co_u32_e32 v4, vcc, -1, v4
 ; GFX90A-NEXT:    v_addc_co_u32_e32 v5, vcc, -1, v5, vcc
 ; GFX90A-NEXT:    v_cmp_eq_u64_e32 vcc, 0, v[4:5]
 ; GFX90A-NEXT:    s_or_b64 s[4:5], vcc, s[4:5]
 ; GFX90A-NEXT:    s_waitcnt vmcnt(0)
-; GFX90A-NEXT:    global_store_dword v[0:1], v8, off offset:-8
-; GFX90A-NEXT:    v_pk_mov_b32 v[0:1], v[6:7], v[6:7] op_sel:[0,1]
+; GFX90A-NEXT:    global_store_dword v[0:1], v6, off offset:-4
 ; GFX90A-NEXT:    s_andn2_b64 exec, exec, s[4:5]
 ; GFX90A-NEXT:    s_cbranch_execnz .LBB1_1
 ; GFX90A-NEXT:  ; %bb.2: ; %exit
@@ -188,15 +178,14 @@ define void @k_ne_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n, i64 %step)
 ; GFX942-NEXT:    s_mov_b64 s[0:1], 0
 ; GFX942-NEXT:  .LBB1_1: ; %loop
 ; GFX942-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX942-NEXT:    global_load_dword v8, v[2:3], off offset:-4
+; GFX942-NEXT:    global_load_dword v6, v[2:3], off offset:-4
 ; GFX942-NEXT:    v_lshl_add_u64 v[4:5], v[4:5], 0, -1
-; GFX942-NEXT:    v_lshl_add_u64 v[6:7], v[0:1], 0, -4
 ; GFX942-NEXT:    v_cmp_eq_u64_e32 vcc, 0, v[4:5]
 ; GFX942-NEXT:    v_lshl_add_u64 v[2:3], v[2:3], 0, -4
+; GFX942-NEXT:    v_lshl_add_u64 v[0:1], v[0:1], 0, -4
 ; GFX942-NEXT:    s_or_b64 s[0:1], vcc, s[0:1]
 ; GFX942-NEXT:    s_waitcnt vmcnt(0)
-; GFX942-NEXT:    global_store_dword v[0:1], v8, off offset:-8
-; GFX942-NEXT:    v_mov_b64_e32 v[0:1], v[6:7]
+; GFX942-NEXT:    global_store_dword v[0:1], v6, off offset:-4
 ; GFX942-NEXT:    s_andn2_b64 exec, exec, s[0:1]
 ; GFX942-NEXT:    s_cbranch_execnz .LBB1_1
 ; GFX942-NEXT:  ; %bb.2: ; %exit
@@ -211,18 +200,17 @@ define void @k_ne_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n, i64 %step)
 ; GFX1250-NEXT:    s_mov_b32 s0, 0
 ; GFX1250-NEXT:  .LBB1_1: ; %loop
 ; GFX1250-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1250-NEXT:    global_load_b32 v8, v[2:3], off offset:-4
+; GFX1250-NEXT:    global_load_b32 v6, v[2:3], off offset:-4
 ; GFX1250-NEXT:    v_add_nc_u64_e32 v[4:5], -1, v[4:5]
-; GFX1250-NEXT:    v_add_nc_u64_e32 v[6:7], -4, v[0:1]
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
 ; GFX1250-NEXT:    v_add_nc_u64_e32 v[2:3], -4, v[2:3]
+; GFX1250-NEXT:    v_add_nc_u64_e32 v[0:1], -4, v[0:1]
 ; GFX1250-NEXT:    s_delay_alu instid0(VALU_DEP_3)
 ; GFX1250-NEXT:    v_cmp_eq_u64_e32 vcc_lo, 0, v[4:5]
 ; GFX1250-NEXT:    s_or_b32 s0, vcc_lo, s0
 ; GFX1250-NEXT:    s_wait_loadcnt 0x0
-; GFX1250-NEXT:    global_store_b32 v[0:1], v8, off offset:-8
+; GFX1250-NEXT:    global_store_b32 v[0:1], v6, off offset:-4
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
-; GFX1250-NEXT:    v_mov_b64_e32 v[0:1], v[6:7]
 ; GFX1250-NEXT:    s_and_not1_b32 exec_lo, exec_lo, s0
 ; GFX1250-NEXT:    s_cbranch_execnz .LBB1_1
 ; GFX1250-NEXT:  ; %bb.2: ; %exit
@@ -248,8 +236,7 @@ exit:
 
 ; The decrement -2 is not a multiple of the store size. On gfx90a and gfx942,
 ; the new pointer with offset -2 would misalign the base of an aligned store,
-; so the store must keep the old pointer there.
-; FIXME: On the other targets, the store can use the new pointer.
+; so the store keeps the old pointer there.
 define void @misaligned_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX1030-LABEL: misaligned_c:
 ; GFX1030:       ; %bb.0: ; %entry
@@ -258,19 +245,17 @@ define void @misaligned_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX1030-NEXT:    .p2align 6
 ; GFX1030-NEXT:  .LBB2_1: ; %loop
 ; GFX1030-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1030-NEXT:    global_load_dword v8, v[2:3], off offset:-4
+; GFX1030-NEXT:    global_load_dword v6, v[2:3], off offset:-4
 ; GFX1030-NEXT:    v_add_co_u32 v4, vcc_lo, v4, -1
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v5, null, -1, v5, vcc_lo
-; GFX1030-NEXT:    v_mov_b32_e32 v6, v0
-; GFX1030-NEXT:    v_mov_b32_e32 v7, v1
 ; GFX1030-NEXT:    v_add_co_u32 v2, vcc_lo, v2, -4
 ; GFX1030-NEXT:    v_add_co_ci_u32_e64 v3, null, -1, v3, vcc_lo
 ; GFX1030-NEXT:    v_cmp_eq_u64_e32 vcc_lo, 0, v[4:5]
-; GFX1030-NEXT:    v_add_co_u32 v0, s4, v6, -2
-; GFX1030-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v7, s4
+; GFX1030-NEXT:    v_add_co_u32 v0, s4, v0, -2
+; GFX1030-NEXT:    v_add_co_ci_u32_e64 v1, null, -1, v1, s4
 ; GFX1030-NEXT:    s_or_b32 s5, vcc_lo, s5
 ; GFX1030-NEXT:    s_waitcnt vmcnt(0)
-; GFX1030-NEXT:    global_store_dword v[6:7], v8, off offset:-4
+; GFX1030-NEXT:    global_store_dword v[0:1], v6, off offset:-2
 ; GFX1030-NEXT:    s_andn2_b32 exec_lo, exec_lo, s5
 ; GFX1030-NEXT:    s_cbranch_execnz .LBB2_1
 ; GFX1030-NEXT:  ; %bb.2: ; %exit
@@ -331,18 +316,17 @@ define void @misaligned_c(ptr addrspace(1) %d, ptr addrspace(1) %s, i64 %n) {
 ; GFX1250-NEXT:    s_mov_b32 s0, 0
 ; GFX1250-NEXT:  .LBB2_1: ; %loop
 ; GFX1250-NEXT:    ; =>This Inner Loop Header: Depth=1
-; GFX1250-NEXT:    global_load_b32 v8, v[2:3], off offset:-4
+; GFX1250-NEXT:    global_load_b32 v6, v[2:3], off offset:-4
 ; GFX1250-NEXT:    v_add_nc_u64_e32 v[4:5], -1, v[4:5]
-; GFX1250-NEXT:    v_add_nc_u64_e32 v[6:7], -2, v[0:1]
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
 ; GFX1250-NEXT:    v_add_nc_u64_e32 v[2:3], -4, v[2:3]
+; GFX1250-NEXT:    v_add_nc_u64_e32 v[0:1], -2, v[0:1]
 ; GFX1250-NEXT:    s_delay_alu instid0(VALU_DEP_3)
 ; GFX1250-NEXT:    v_cmp_eq_u64_e32 vcc_lo, 0, v[4:5]
 ; GFX1250-NEXT:    s_or_b32 s0, vcc_lo, s0
 ; GFX1250-NEXT:    s_wait_loadcnt 0x0
-; GFX1250-NEXT:    global_store_b32 v[0:1], v8, off offset:-4
+; GFX1250-NEXT:    global_store_b32 v[0:1], v6, off offset:-2
 ; GFX1250-NEXT:    s_wait_xcnt 0x0
-; GFX1250-NEXT:    v_mov_b64_e32 v[0:1], v[6:7]
 ; GFX1250-NEXT:    s_and_not1_b32 exec_lo, exec_lo, s0
 ; GFX1250-NEXT:    s_cbranch_execnz .LBB2_1
 ; GFX1250-NEXT:  ; %bb.2: ; %exit
