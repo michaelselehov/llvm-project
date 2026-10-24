@@ -28760,8 +28760,15 @@ unsigned BoUpSLP::getVectorElementSize(Value *V) {
   if (auto *Store = dyn_cast<StoreInst>(V))
     return DL->getTypeSizeInBits(Store->getValueOperand()->getType());
 
-  if (auto *IEI = dyn_cast<InsertElementInst>(V))
-    return getVectorElementSize(IEI->getOperand(1));
+  if (auto *IEI = dyn_cast<InsertElementInst>(V)) {
+    Value *Elt = IEI->getOperand(1);
+    unsigned Width = getVectorElementSize(Elt);
+    // A wider load in the operand tree does not widen the lanes of the
+    // buildvector. An i1 lane says nothing about the width of its compare.
+    if (!Elt->getType()->isIntegerTy(1))
+      Width = std::min<unsigned>(Width, DL->getTypeSizeInBits(Elt->getType()));
+    return Width;
+  }
 
   if (auto *IVI = dyn_cast<InsertValueInst>(V))
     return getVectorElementSize(IVI->getOperand(1));
@@ -35908,6 +35915,12 @@ bool SLPVectorizerPass::vectorizeInsertElementInst(InsertElementInst *IEI,
       (all_of(BuildVectorOpds, IsaPred<ExtractElementInst, UndefValue>) &&
        isFixedVectorShuffle(BuildVectorOpds, Mask, AC, R.getAnalysisCache())))
     return false;
+
+  // A stored buildvector is seeded like the store chain it replaces, before
+  // the reductions that could take its lanes apart.
+  if (MaxVFOnly && BuildVectorInsts.size() == 2 && IEI->hasOneUse() &&
+      isa<StoreInst>(*IEI->user_begin()))
+    return tryToVectorizeList(BuildVectorInsts, R, /*MaxVFOnly=*/false);
 
   if (MaxVFOnly && BuildVectorInsts.size() == 2) {
     R.getORE()->emit([&]() {
