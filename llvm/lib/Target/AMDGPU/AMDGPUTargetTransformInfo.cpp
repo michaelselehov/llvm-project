@@ -1066,6 +1066,12 @@ InstructionCost GCNTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
         Elts && Src->isIntegerTy(*Elts))
       return InstructionCost(MaskUnpackCostPerElt) * *Elts *
              getFullRateInstrCost();
+    // Integer and floating-point values share the same registers.
+    if (Src->getPrimitiveSizeInBits() == Dst->getPrimitiveSizeInBits() &&
+        !Src->isPtrOrPtrVectorTy() && !Dst->isPtrOrPtrVectorTy() &&
+        !Src->getScalarType()->isIntegerTy(1) &&
+        !Dst->getScalarType()->isIntegerTy(1))
+      return 0;
   }
 
   // Each f32 lane is rounded and the halves are packed in pairs. A packed
