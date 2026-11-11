@@ -16609,6 +16609,26 @@ static std::optional<unsigned> getCastOpcodeForDemotedOperand(unsigned Opcode,
   }
 }
 
+/// Returns \p Repr if it can be the context of the vector cost of the lanes in
+/// \p VL that it represents (the lanes for which \p IsReprLane is true): the
+/// vector cost \p CostInCtx must not change if any of these lanes is the
+/// context instead of \p Repr. Otherwise the vector would inherit the
+/// properties of one lane, like the users of an fmul that fuses into an fma.
+static const Instruction *getAgreedCostContext(
+    ArrayRef<Value *> VL, const Instruction *Repr,
+    function_ref<bool(const Instruction *)> IsReprLane,
+    function_ref<InstructionCost(const Instruction *)> CostInCtx) {
+  if (!Repr)
+    return nullptr;
+  const InstructionCost ReprCost = CostInCtx(Repr);
+  for (Value *V : VL) {
+    auto *I = dyn_cast<Instruction>(V);
+    if (I && I != Repr && IsReprLane(I) && CostInCtx(I) != ReprCost)
+      return nullptr;
+  }
+  return Repr;
+}
+
 InstructionCost
 BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
                       SmallPtrSetImpl<Value *> &CheckedExtracts) {
@@ -17402,13 +17422,22 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
         }
       }
       if (!VecCost.isValid()) {
+        const Instruction *VecCtxI = getAgreedCostContext(
+            UniqueValues.getArrayRef(), VL0,
+            [&](const Instruction *I) {
+              return I->getOpcode() == E->getOpcode();
+            },
+            [&](const Instruction *I) {
+              return TTI->getCmpSelInstrCost(E->getOpcode(), VecTy, MaskTy,
+                                             VecPred, CostKind, {}, {}, I);
+            });
         VecCost = TTI->getCmpSelInstrCost(
             E->getOpcode(), VecTy, MaskTy, VecPred, CostKind,
             TTI::getOperandInfo(
                 E->getOperand(ShuffleOrOp == Instruction::Select ? 1 : 0)),
             TTI::getOperandInfo(
                 E->getOperand(ShuffleOrOp == Instruction::Select ? 2 : 1)),
-            VL0);
+            VecCtxI);
         if (IsBitTest)
           VecCost +=
               TTI->getArithmeticInstrCost(Instruction::And, VecTy, CostKind);
@@ -17738,9 +17767,17 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
       unsigned OpIdx = isa<UnaryOperator>(VL0) ? 0 : 1;
       TTI::OperandValueInfo Op1Info = TTI::getOperandInfo(E->getOperand(0));
       TTI::OperandValueInfo Op2Info = TTI::getOperandInfo(E->getOperand(OpIdx));
-      InstructionCost Cost = TTI->getArithmeticInstrCost(
-          ShuffleOrOp, VecTy, CostKind, Op1Info, Op2Info, {},
-          VL0->getOpcode() == ShuffleOrOp ? VL0 : nullptr, TLI);
+      const Instruction *VecCtxI = getAgreedCostContext(
+          UniqueValues.getArrayRef(),
+          VL0->getOpcode() == ShuffleOrOp ? VL0 : nullptr,
+          [&](const Instruction *I) { return I->getOpcode() == ShuffleOrOp; },
+          [&](const Instruction *I) {
+            return TTI->getArithmeticInstrCost(ShuffleOrOp, VecTy, CostKind,
+                                               Op1Info, Op2Info, {}, I, TLI);
+          });
+      InstructionCost Cost =
+          TTI->getArithmeticInstrCost(ShuffleOrOp, VecTy, CostKind, Op1Info,
+                                      Op2Info, {}, VecCtxI, TLI);
       // N columns need N-1 vector combines; price extra columns
       // conservatively, skipping identity-only columns (not combined by
       // codegen).
@@ -17756,8 +17793,7 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
           // static properties to model.
           Cost += TTI->getArithmeticInstrCost(
               ShuffleOrOp, VecTy, CostKind, {},
-              TTI::getOperandInfo(E->getOperand(Idx)), {},
-              VL0->getOpcode() == ShuffleOrOp ? VL0 : nullptr, TLI);
+              TTI::getOperandInfo(E->getOperand(Idx)), {}, VecCtxI, TLI);
         }
       }
       return Cost + CommonCost;
@@ -18087,6 +18123,12 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
       // VecCost is equal to sum of the cost of creating 2 vectors
       // and the cost of creating shuffle.
       InstructionCost VecCost = 0;
+      auto IsLaneOf = [&](const Instruction *Repr) {
+        return [&, Repr](const Instruction *I) {
+          return E->getMatchingMainOpOrAltOp(const_cast<Instruction *>(I)) ==
+                 Repr;
+        };
+      };
       if (TryFindNodeWithEqualOperands()) {
         LLVM_DEBUG({
           dbgs() << "SLP: diamond match for alternate node found.\n";
@@ -18105,16 +18147,23 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
         // folded column is uniform.
         auto ChainCost = [&](unsigned Opcode) {
           InstructionCost Cost = 0;
+          Instruction *Repr =
+              Opcode == E->getOpcode() ? E->getMainOp() : E->getAltOp();
+          const Instruction *CtxI = getAgreedCostContext(
+              UniqueValues.getArrayRef(), Repr, IsLaneOf(Repr),
+              [&](const Instruction *I) {
+                return TTIRef.getArithmeticInstrCost(Opcode, VecTy, CostKind,
+                                                     {}, {}, {}, I, TLI);
+              });
           TTI::OperandValueInfo RunningInfo =
               TTI::getOperandInfo(E->getOperand(0));
           for (unsigned Idx : seq<unsigned>(1, E->getNumOperands())) {
             TTI::OperandValueInfo ColInfo =
                 TTI::getOperandInfo(E->getOperand(Idx));
             if (!RunningInfo.isConstant() || !ColInfo.isConstant())
-              Cost += TTIRef.getArithmeticInstrCost(
-                  Opcode, VecTy, CostKind, RunningInfo, ColInfo, {},
-                  Opcode == E->getOpcode() ? E->getMainOp() : E->getAltOp(),
-                  TLI);
+              Cost += TTIRef.getArithmeticInstrCost(Opcode, VecTy, CostKind,
+                                                    RunningInfo, ColInfo, {},
+                                                    CtxI, TLI);
             TTI::OperandValueKind Kind = TTI::OK_AnyValue;
             if (RunningInfo.isConstant() && ColInfo.isConstant())
               Kind = RunningInfo.Kind == TTI::OK_UniformConstantValue &&
@@ -18132,13 +18181,23 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
         auto *MaskTy = getWidenedType(Builder.getInt1Ty(), VL.size());
         TTI::OperandValueInfo Op0Info = TTI::getOperandInfo(E->getOperand(0));
         TTI::OperandValueInfo Op1Info = TTI::getOperandInfo(E->getOperand(1));
+        auto CmpCtxI = [&](Instruction *Repr) {
+          return getAgreedCostContext(
+              UniqueValues.getArrayRef(), Repr, IsLaneOf(Repr),
+              [&](const Instruction *I) {
+                return TTIRef.getCmpSelInstrCost(
+                    E->getOpcode(), VecTy, MaskTy,
+                    cast<CmpInst>(Repr)->getPredicate(), CostKind, Op0Info,
+                    Op1Info, I);
+              });
+        };
         VecCost = TTIRef.getCmpSelInstrCost(E->getOpcode(), VecTy, MaskTy,
                                             CI0->getPredicate(), CostKind,
-                                            Op0Info, Op1Info, VL0);
+                                            Op0Info, Op1Info, CmpCtxI(VL0));
         VecCost += TTIRef.getCmpSelInstrCost(
             E->getOpcode(), VecTy, MaskTy,
             cast<CmpInst>(E->getAltOp())->getPredicate(), CostKind, Op0Info,
-            Op1Info, E->getAltOp());
+            Op1Info, CmpCtxI(E->getAltOp()));
       } else {
         Type *SrcTy =
             getWidenedType(E->getMainOp()->getOperand(0)->getType(), VL.size());
@@ -18185,10 +18244,18 @@ BoUpSLP::getEntryCost(const TreeEntry *E, ArrayRef<Value *> VectorizedVals,
         if (Opcode0 == Opcode1)
           return VecCost +
                  TTIRef.getCastInstrCost(Opcode0, VecTy, SrcTy, CCH, CostKind);
+        auto CastCtxI = [&](unsigned Opcode, Instruction *Repr) {
+          return getAgreedCostContext(
+              UniqueValues.getArrayRef(), Repr, IsLaneOf(Repr),
+              [&](const Instruction *I) {
+                return TTIRef.getCastInstrCost(Opcode, VecTy, SrcTy, CCH,
+                                               CostKind, I);
+              });
+        };
         VecCost += TTIRef.getCastInstrCost(Opcode0, VecTy, SrcTy, CCH, CostKind,
-                                           E->getMainOp());
+                                           CastCtxI(Opcode0, E->getMainOp()));
         VecCost += TTIRef.getCastInstrCost(Opcode1, VecTy, SrcTy, CCH, CostKind,
-                                           E->getAltOp());
+                                           CastCtxI(Opcode1, E->getAltOp()));
       }
       SmallVector<int> Mask;
       E->buildAltOpShuffleMask(
